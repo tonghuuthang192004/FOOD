@@ -6,7 +6,6 @@ import '../home/food_page_body.dart';
 
 class MainFoodPage extends StatefulWidget {
   const MainFoodPage({super.key});
-
   @override
   State<MainFoodPage> createState() => _MainFoodPageState();
 }

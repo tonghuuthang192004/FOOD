@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../home/food_page_body.dart';
 import '../../pay/payment.dart';
 import '../../utils/color.dart';
 import '../../utils/dimensions.dart';
@@ -8,14 +8,15 @@ import '../../widgets/big_text.dart';
 import '../../widgets/exandable_text.dart';
 
 class RecommendFoodDetail extends StatefulWidget {
-  const RecommendFoodDetail({super.key});
+  const RecommendFoodDetail({ super.key, });
+
 
   @override
   _RecommendFoodDetailState createState() => _RecommendFoodDetailState();
 }
 
 class _RecommendFoodDetailState extends State<RecommendFoodDetail> {
-  double _price = 10.0; // Base price for one item
+   // Base price for one item
 
   @override
   Widget build(BuildContext context) {
@@ -37,15 +38,16 @@ class _RecommendFoodDetailState extends State<RecommendFoodDetail> {
                         topLeft: Radius.circular(Dimensions.radius20))),
                 child: Center(
                   child: BigText(
-                    text: "KFC  \$${_price.toStringAsFixed(2)}",
+                    text: "KFC",
                     size: Dimensions.font26,
                   ),
                 ),
               ),
             ),
+
             backgroundColor: Colors.amber,
             flexibleSpace: FlexibleSpaceBar(
-              background: Image.asset(
+              background: Image.network(
                 "assets/images/images1.png",
                 fit: BoxFit.cover,
                 width: double.maxFinite,
@@ -169,3 +171,68 @@ class _RecommendFoodDetailState extends State<RecommendFoodDetail> {
     );
   }
 }
+
+
+// class ProductDetailPage extends StatelessWidget {
+//   final Product product;
+//
+//   ProductDetailPage({required this.product});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text(product.name),
+//       ),
+//       body: Padding(
+//         padding: const EdgeInsets.all(8.0),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             if (product.imageUrl?.isNotEmpty ?? false)
+//               Image.network(product.imageUrl!),
+//             SizedBox(height: 16),
+//             Text(
+//               product.name,
+//               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+//             ),
+//             SizedBox(height: 8),
+//             Text(
+//               'Category: ${product.categoryName}',
+//               style: TextStyle(fontSize: 16),
+//             ),
+//             SizedBox(height: 8),
+//             Text(
+//               'Price: \$${product.price}',
+//               style: TextStyle(fontSize: 16),
+//             ),
+//             SizedBox(height: 8),
+//             Text(
+//               product.description,
+//               style: TextStyle(fontSize: 16),
+//             ),
+//             SizedBox(height: 16),
+//             ElevatedButton(
+//               onPressed: () {
+//                 // Add to cart logic
+//                 // You can add to cart logic here if needed
+//               },
+//               child: Text('Add to Cart'),
+//             ),
+//             SizedBox(height: 8),
+//             if (product.sauceName.isNotEmpty)
+//               Text('Sauce: ${product.sauceName}', style: TextStyle(fontSize: 16)),
+//             if (product.sauceDescription.isNotEmpty)
+//               Text('Description: ${product.sauceDescription}', style: TextStyle(fontSize: 16)),
+//             if (product.saucePrice > 0)
+//               Text('Sauce Price: \$${product.saucePrice}', style: TextStyle(fontSize: 16)),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+
+
+

@@ -1,58 +1,94 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:line_awesome_flutter/line_awesome_flutter.dart';
-import '../utils/constants.dart';
-
-class ProfileListItem extends StatelessWidget {
-  final IconData icon; // Icon to be displayed
-  final String text;   // Text for the list item
-  final bool hasNavigation; // Flag to show navigation icon
-
-  // Constructor with named parameters
-  const ProfileListItem({
-    Key? key,
-    required this.icon,
-    required this.text,
-    this.hasNavigation = true, // Default value for hasNavigation is true
-  }) : super(key: key);
+Color background = Color(0xfff6f4fa);
+Color maincolor = Color(0xfff96163);
+Color font = Color(0xfff3C444C);
+class Profil extends StatelessWidget {
+  Profil({super.key});
 
   @override
+  List<Icon> icons = [
+    Icon(Icons.person, color: maincolor),
+    Icon(Icons.settings, color: maincolor),
+    Icon(Icons.note_add, color: maincolor),
+    Icon(Icons.favorite, color: maincolor),
+    Icon(Icons.chat, color: maincolor),
+    Icon(Icons.login, color: maincolor),
+  ];
+  List titls = [
+    'Perconal data',
+    'Settings',
+    'E-Statement',
+    'Refferal Code',
+    'FAQs',
+    'Logout'
+  ];
   Widget build(BuildContext context) {
-    return Container(
-      height: kSpacingUnit.w * 5.5,
-      margin: EdgeInsets.symmetric(
-        horizontal: kSpacingUnit.w * 4,
-      ).copyWith(
-        bottom: kSpacingUnit.w * 2,
-      ),
-      padding: EdgeInsets.symmetric(
-        horizontal: kSpacingUnit.w * 2,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(kSpacingUnit.w * 3),
-        color: Theme.of(context).colorScheme.background,
-      ),
-      child: Row(
-        children: <Widget>[
-          Icon(
-            icon, // Dynamic icon passed to constructor
-            size: kSpacingUnit.w * 2.5, // Scalable icon size
-          ),
-          SizedBox(width: kSpacingUnit.w * 1.5), // Space between icon and text
-          Text(
-            text, // Dynamic text passed to constructor
-            style: kTitleTextStyle.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          Spacer(), // Push the right icon to the far right
-          if (hasNavigation) // Show navigation icon if true
-            Icon(
-              Icons.add_a_photo_outlined, // Arrow icon for navigation
-              size: kSpacingUnit.w * 2.5, // Scalable icon size
-            ),
-        ],
-      ),
+    return Scaffold(
+      backgroundColor: background,
+      body: SafeArea(
+          child: Column(
+            children: [
+              SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: maincolor, width: 2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundImage: AssetImage('images/p3.jpg'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Charlotte',
+                style: TextStyle(fontSize: 18, color: font, fontFamily: 'ro'),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Divider(
+                  height: 40,
+                  thickness: 2,
+                ),
+              ),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: 6,
+                itemBuilder: (BuildContext context, int index) {
+                  return ListTile(
+                    leading: Container(
+                      width: 37,
+                      height: 37,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: icons[index],
+                    ),
+                    title: Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        titls[index],
+                        style: TextStyle(fontSize: 17, color: font),
+                      ),
+                    ),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios_sharp,
+                      size: 15,
+                    ),
+                  );
+                },
+              ),
+            ],
+          )),
     );
   }
 }

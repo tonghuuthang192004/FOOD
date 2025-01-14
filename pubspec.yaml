@@ -37,11 +37,14 @@ dependencies:
   cupertino_icons: ^1.0.8
   dots_indicator: ^2.1.1
   get: ^4.6.6
+#  google_fonts: ^6.2.0
+
   http: ^1.2.2
   fluttertoast: ^8.2.10
   line_awesome_flutter: ^3.0.1
   flutter_screenutil: ^5.9.3
   animated_theme_switcher: ^2.0.10
+#  google_fonts: ^6.2.1
 
 
 

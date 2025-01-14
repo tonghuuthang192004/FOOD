@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:onthi/utils/color.dart';
 import 'package:onthi/widgets/big_text.dart';
 import 'package:onthi/widgets/icon_and_text_widget.dart';
@@ -19,6 +21,9 @@ class FoodPageBody extends StatefulWidget {
 }
 
 class _FoodPageBodyState extends State<FoodPageBody> {
+  List<Product> _products = [];
+  bool _isLoading = true;
+  String selectedCategory = ''; // Store the selected category
   PageController pageController = PageController(viewportFraction: 0.9);
   var _currpapevalue = 0.0;
   double _scaleFactory = 0.8;
@@ -27,10 +32,10 @@ class _FoodPageBodyState extends State<FoodPageBody> {
   @override
   void initState() {
     super.initState();
+    fetchProducts(''); // Fetch products for all categories initially
     pageController.addListener(() {
       setState(() {
         _currpapevalue = pageController.page!;
-        print("current value is " + _currpapevalue.toString());
       });
     });
   }
@@ -41,13 +46,35 @@ class _FoodPageBodyState extends State<FoodPageBody> {
     pageController.dispose();
   }
 
+  // Fetch products from API with the selected category
+  Future<void> fetchProducts(String category) async {
+    final url = 'http://192.168.30.107/API/search_products.php?query=&category=$category';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          _products = data.map((json) => Product.fromJson(json)).toList();
+          _isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load products');
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error fetching products: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        //slider section
+        // Slider section
         SizedBox(
-          // color: Colors.redAccent,
           height: Dimensions.pageView,
           child: PageView.builder(
               controller: pageController,
@@ -56,7 +83,7 @@ class _FoodPageBodyState extends State<FoodPageBody> {
                 return _buildPageItem(position);
               }),
         ),
-        // dots
+        // Dots
         DotsIndicator(
           dotsCount: 5,
           position: _currpapevalue,
@@ -67,19 +94,32 @@ class _FoodPageBodyState extends State<FoodPageBody> {
             activeShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
           ),
         ),
-        CategoryWidget(),
-
-        ListView.builder(
+        // Category Widget
+        CategoryWidget(
+          onCategorySelected: (category) {
+            setState(() {
+              selectedCategory = category; // Update the selected category
+              _isLoading = true; // Show loading indicator
+            });
+            fetchProducts(category); // Fetch products based on selected category
+          },
+        ),
+        // List of Products
+        _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : ListView.builder(
           physics: NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          itemCount: 10,
+          itemCount: _products.length,
           itemBuilder: (context, index) {
+            final product = _products[index];
             return GestureDetector(
               onTap: () {
-                // Navigate to RecommendFoodDetail page
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RecommendFoodDetail()),
+                  MaterialPageRoute(
+                    builder: (context) => PopularFoodDetail(),
+                  ),
                 );
               },
               child: Container(
@@ -89,7 +129,7 @@ class _FoodPageBodyState extends State<FoodPageBody> {
                     bottom: Dimensions.height10),
                 child: Row(
                   children: [
-                    // image section
+                    // Image section
                     Container(
                       width: Dimensions.listViewImgSize,
                       height: Dimensions.listViewImgSize,
@@ -98,7 +138,9 @@ class _FoodPageBodyState extends State<FoodPageBody> {
                         color: Colors.white38,
                         image: DecorationImage(
                           fit: BoxFit.cover,
-                          image: AssetImage("assets/images/images1.png"),
+                          image: product.imageUrl != null
+                              ? NetworkImage(product.imageUrl!)
+                              : AssetImage("assets/images/images1.png") as ImageProvider,
                         ),
                       ),
                     ),
@@ -120,26 +162,29 @@ class _FoodPageBodyState extends State<FoodPageBody> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              BigText(text: "Gà rán"),
+                              BigText(text: product.name),
                               SizedBox(height: Dimensions.height10),
-                              SmallText(text: "thơm ngon"),
+                              SmallText(text: product.description),
                               SizedBox(height: Dimensions.height10),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   IconAndTextWidget(
-                                      icon: Icons.circle_sharp,
-                                      text: "Normal",
-                                      iconColor: AppColors.iconColor1),
+                                    icon: Icons.circle_sharp,
+                                    text: "Normal",
+                                    iconColor: AppColors.iconColor1,
+                                  ),
                                   IconAndTextWidget(
-                                      icon: Icons.location_on,
-                                      text: "1.7km",
-                                      iconColor: AppColors.mainColor),
+                                    icon: Icons.location_on,
+                                    text: "1.7km",
+                                    iconColor: AppColors.mainColor,
+                                  ),
                                   IconAndTextWidget(
-                                      icon: Icons.access_time,
-                                      text: "32min",
-                                      iconColor: AppColors.iconColor2),
+                                    icon: Icons.access_time,
+                                    text: "32min",
+                                    iconColor: AppColors.iconColor2,
+                                  ),
                                 ],
                               ),
                             ],
@@ -152,8 +197,7 @@ class _FoodPageBodyState extends State<FoodPageBody> {
               ),
             );
           },
-        )
-
+        ),
       ],
     );
   }
@@ -189,7 +233,6 @@ class _FoodPageBodyState extends State<FoodPageBody> {
       transform: matrix,
       child: GestureDetector(
         onTap: () {
-          // Navigate to RecommendFoodDetail page
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => RecommendFoodDetail()),
@@ -298,7 +341,115 @@ class _FoodPageBodyState extends State<FoodPageBody> {
       ),
     );
   }
-
 }
 
+// Product Model
+class Product {
+  final int id;
+  final String name;
+  final double price;
+  final String description;
+  final String sauceName;
+  final String sauceDescription;
+  final double saucePrice;
+  final String categoryName;
+  final String? imageUrl;
 
+  Product({
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.description,
+    required this.sauceName,
+    required this.sauceDescription,
+    required this.saucePrice,
+    required this.categoryName,
+    this.imageUrl,
+  });
+
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: int.tryParse(json['id_san_pham'].toString()) ?? 0,
+      name: json['product_name'],
+      price: double.tryParse(json['price'].toString()) ?? 0.0,
+      description: json['description'],
+      sauceName: json['sauce_name'],
+      sauceDescription: json['sauce_description'],
+      saucePrice: double.tryParse(json['sauce_price'].toString()) ?? 0.0,
+      categoryName: json['category_name'],
+      imageUrl: json['image_url'],
+    );
+  }
+}
+
+class CategoryWidget extends StatelessWidget {
+  final Function(String) onCategorySelected;
+
+  const CategoryWidget({super.key, required this.onCategorySelected});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(
+        vertical: Dimensions.height20,
+        horizontal: Dimensions.width20,
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _buildCategoryItem(context, "assets/images/images3.png", "Burgers"),
+            _buildCategoryItem(context, "assets/images/images4.png", "Pizza"),
+            _buildCategoryItem(context, "assets/images/images5.png", "Drinks"),
+            _buildCategoryItem(context, "assets/images/images1.png", "Desserts"),
+            _buildCategoryItem(context, "assets/images/pizza2.png", "Combo"),
+            _buildCategoryItem(context, "assets/images/burger3.png", "Khuyến Mãi"),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryItem(BuildContext context, String imagePath, String categoryName) {
+    return GestureDetector(
+      onTap: () {
+        onCategorySelected(categoryName);
+      },
+      child: Padding(
+        padding: EdgeInsets.only(right: Dimensions.width20),
+        child: Column(
+          children: [
+            Container(
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+                image: DecorationImage(
+                  image: AssetImage(imagePath),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            SizedBox(height: 12),
+            Text(
+              categoryName,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

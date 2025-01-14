@@ -6,10 +6,11 @@ import '../../utils/color.dart';
 import '../../widgets/app_column.dart';
 import '../../widgets/big_text.dart';
 import '../../widgets/exandable_text.dart';
+import '../home/food_page_body.dart';
 import '../home/main_food_page.dart'; // Import your MainFoodPage
 
 class PopularFoodDetail extends StatefulWidget {
-  const PopularFoodDetail({super.key});
+  const PopularFoodDetail({super.key,});
 
   @override
   _PopularFoodDetailState createState() => _PopularFoodDetailState();
