@@ -37,9 +37,14 @@ class _RecommendFoodDetailState extends State<RecommendFoodDetail> {
                         topRight: Radius.circular(Dimensions.radius20),
                         topLeft: Radius.circular(Dimensions.radius20))),
                 child: Center(
-                  child: BigText(
-                    text: "KFC",
-                    size: Dimensions.font26,
+                  child: Column(
+                    children: [
+                      BigText(
+                        text: "KFC",
+                        size: Dimensions.font26,
+                      ),
+                      BigText(text: "90000")
+                    ],
                   ),
                 ),
               ),

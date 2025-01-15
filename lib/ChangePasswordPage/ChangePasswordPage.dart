@@ -1,4 +1,9 @@
+
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../pages/login/login.dart'; // Thay đổi theo đường dẫn đúng của LoginPage
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -8,10 +13,81 @@ class ChangePasswordPage extends StatefulWidget {
 }
 
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
-  // To toggle password visibility
+  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+
   bool _obscureCurrentPassword = true;
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
+
+  // Hàm gọi API để thay đổi mật khẩu
+  Future<void> _changePassword() async {
+    // Lấy giá trị từ các controller
+    String currentPassword = _currentPasswordController.text;
+    String newPassword = _newPasswordController.text;
+    String confirmPassword = _confirmPasswordController.text;
+
+    // Kiểm tra nếu các trường mật khẩu trống
+    if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
+      Fluttertoast.showToast(
+        msg: "Vui lòng điền đầy đủ thông tin!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      return;
+    }
+
+    // Kiểm tra nếu mật khẩu mới và xác nhận mật khẩu không khớp
+    if (newPassword != confirmPassword) {
+      Fluttertoast.showToast(
+        msg: "Mật khẩu mới và xác nhận không khớp!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      return;
+    }
+
+    // Gửi yêu cầu API để thay đổi mật khẩu
+    var url = Uri.parse("http://192.168.2.5/API/user/change_password.php"); // Đảm bảo đúng URL API
+    var response = await http.post(url, body: {
+      "mat_khau_cu": currentPassword,
+      "mat_khau_moi": newPassword,
+    });
+
+    var data = json.decode(response.body);
+    if (data == "Success") {
+      Fluttertoast.showToast(
+        msg: "Cập nhật mật khẩu thành công!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+
+      // Chuyển hướng đến trang đăng nhập
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()), // Đảm bảo rằng bạn đã tạo LoginPage
+      );
+    } else {
+      Fluttertoast.showToast(
+        msg: "Đổi mật khẩu thất bại! Kiểm tra lại thông tin.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +99,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           children: [
             // Current Password Field
             TextFormField(
+              controller: _currentPasswordController,
               obscureText: _obscureCurrentPassword,
               decoration: InputDecoration(
                 labelText: 'Mật khẩu hiện tại',
@@ -43,6 +120,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
             // New Password Field
             TextFormField(
+              controller: _newPasswordController,
               obscureText: _obscureNewPassword,
               decoration: InputDecoration(
                 labelText: 'Mật khẩu mới',
@@ -63,6 +141,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
             // Confirm New Password Field
             TextFormField(
+              controller: _confirmPasswordController,
               obscureText: _obscureConfirmPassword,
               decoration: InputDecoration(
                 labelText: 'Xác nhận mật khẩu mới',
@@ -83,9 +162,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
             // Change Password Button
             ElevatedButton(
-              onPressed: () {
-                // Add password change functionality here
-              },
+              onPressed: _changePassword,
               child: const Text('Đổi mật khẩu'),
             ),
           ],

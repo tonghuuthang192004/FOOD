@@ -1,38 +1,51 @@
 import 'dart:convert';
-import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:dots_indicator/dots_indicator.dart';
 import 'package:onthi/utils/color.dart';
 import 'package:onthi/widgets/big_text.dart';
-import 'package:onthi/widgets/icon_and_text_widget.dart';
 import 'package:onthi/widgets/small_text.dart';
 import 'package:onthi/utils/dimensions.dart';
-
+import 'package:onthi/widgets/icon_and_text_widget.dart';
 import '../../category/ProductPage.dart';
 import '../food/food_detail.dart';
 import '../food/popular_food_detail.dart';
 import 'category_food.dart';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:dots_indicator/dots_indicator.dart';
+import 'package:onthi/utils/color.dart';
+import 'package:onthi/widgets/big_text.dart';
+import 'package:onthi/widgets/small_text.dart';
+import 'package:onthi/utils/dimensions.dart';
+import 'package:onthi/widgets/icon_and_text_widget.dart';
+import 'category_food.dart';
 
 class FoodPageBody extends StatefulWidget {
-  const FoodPageBody({super.key});
+  const FoodPageBody({super.key, required this.searchQuery});
+
+  final String searchQuery;
 
   @override
   State<FoodPageBody> createState() => _FoodPageBodyState();
 }
 
 class _FoodPageBodyState extends State<FoodPageBody> {
+  String connection = "http://192.168.35.130/API/";  // API connection URL
   List<Product> _products = [];
+  List<Product> _filteredProducts = [];
   bool _isLoading = true;
-  String selectedCategory = ''; // Store the selected category
+  String selectedCategoryId = '';  // Store selected category ID
   PageController pageController = PageController(viewportFraction: 0.9);
-  var _currpapevalue = 0.0;
+  double _currpapevalue = 0.0;
   double _scaleFactory = 0.8;
   double _height = Dimensions.pageViewContainer;
 
   @override
   void initState() {
     super.initState();
-    fetchProducts(''); // Fetch products for all categories initially
+    fetchProducts();  // Load all products when the page is first opened
     pageController.addListener(() {
       setState(() {
         _currpapevalue = pageController.page!;
@@ -43,12 +56,14 @@ class _FoodPageBodyState extends State<FoodPageBody> {
   @override
   void dispose() {
     super.dispose();
-    pageController.dispose();
+    pageController.dispose();  // Dispose of page controller when no longer needed
   }
 
-  // Fetch products from API with the selected category
-  Future<void> fetchProducts(String category) async {
-    final url = 'http://192.168.30.107/API/search_products.php?query=&category=$category';
+  // Fetch products from API with optional category ID and search query
+  Future<void> fetchProducts({String categoryId = '', String searchQuery = ''}) async {
+    final url = categoryId.isEmpty
+        ? '$connection/list.php?search_query=$searchQuery'  // If no category is selected, just search by query
+        : '$connection/list.php?id_danh_muc=$categoryId';  // If category is selected, search by category
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -56,6 +71,7 @@ class _FoodPageBodyState extends State<FoodPageBody> {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
           _products = data.map((json) => Product.fromJson(json)).toList();
+          _filteredProducts = List.from(_products);
           _isLoading = false;
         });
       } else {
@@ -66,6 +82,23 @@ class _FoodPageBodyState extends State<FoodPageBody> {
         _isLoading = false;
       });
       print('Error fetching products: $e');
+    }
+  }
+
+  // Filter products when search query changes
+  void _searchProducts(String query) {
+    setState(() {
+      _filteredProducts = _products
+          .where((product) => product.name.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant FoodPageBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.searchQuery != oldWidget.searchQuery) {
+      _searchProducts(widget.searchQuery);  // If search query changes, filter the products
     }
   }
 
@@ -83,7 +116,7 @@ class _FoodPageBodyState extends State<FoodPageBody> {
                 return _buildPageItem(position);
               }),
         ),
-        // Dots
+        // Dots for page indicator
         DotsIndicator(
           dotsCount: 5,
           position: _currpapevalue,
@@ -94,116 +127,106 @@ class _FoodPageBodyState extends State<FoodPageBody> {
             activeShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0)),
           ),
         ),
-        // Category Widget
+        // Category Widget with selection callback
         CategoryWidget(
-          onCategorySelected: (category) {
+          onCategorySelected: (categoryId) {
             setState(() {
-              selectedCategory = category; // Update the selected category
-              _isLoading = true; // Show loading indicator
+              selectedCategoryId = categoryId;
+              _isLoading = true;  // Show loading spinner while fetching products
             });
-            fetchProducts(category); // Fetch products based on selected category
+            fetchProducts(categoryId: selectedCategoryId, searchQuery: widget.searchQuery);  // Fetch products by category
           },
+          selectedCategoryId: selectedCategoryId, // Truyền ID danh mục đang chọn
+
         ),
-        // List of Products
-        _isLoading
-            ? Center(child: CircularProgressIndicator())
-            : ListView.builder(
-          physics: NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: _products.length,
-          itemBuilder: (context, index) {
-            final product = _products[index];
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PopularFoodDetail(),
-                  ),
-                );
-              },
-              child: Container(
-                margin: EdgeInsets.only(
-                    left: Dimensions.width20,
-                    right: Dimensions.width20,
-                    bottom: Dimensions.height10),
-                child: Row(
-                  children: [
-                    // Image section
-                    Container(
-                      width: Dimensions.listViewImgSize,
-                      height: Dimensions.listViewImgSize,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(Dimensions.radius20),
-                        color: Colors.white38,
-                        image: DecorationImage(
-                          fit: BoxFit.cover,
-                          image: product.imageUrl != null
-                              ? NetworkImage(product.imageUrl!)
-                              : AssetImage("assets/images/images1.png") as ImageProvider,
-                        ),
-                      ),
+
+        // Show loading spinner while fetching data
+        if (_isLoading)
+          Center(child: CircularProgressIndicator())
+        else
+          ListView.builder(
+            physics: NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: _filteredProducts.length,
+            itemBuilder: (context, index) {
+              final product = _filteredProducts[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PopularFoodDetail(product: product),
                     ),
-                    Expanded(
-                      child: Container(
-                        height: Dimensions.listViewTextContsize,
+                  );
+                },
+                child: Container(
+                  margin: EdgeInsets.only(
+                      left: Dimensions.width20,
+                      right: Dimensions.width20,
+                      bottom: Dimensions.height10),
+                  child: Row(
+                    children: [
+                      // Product image section
+                      Container(
+                        width: Dimensions.listViewImgSize,
+                        height: Dimensions.listViewImgSize,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(Dimensions.radius20),
-                            bottomRight: Radius.circular(Dimensions.radius20),
-                          ),
-                          color: Colors.white,
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                            left: Dimensions.width10,
-                            right: Dimensions.width10,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              BigText(text: product.name),
-                              SizedBox(height: Dimensions.height10),
-                              SmallText(text: product.description),
-                              SizedBox(height: Dimensions.height10),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  IconAndTextWidget(
-                                    icon: Icons.circle_sharp,
-                                    text: "Normal",
-                                    iconColor: AppColors.iconColor1,
-                                  ),
-                                  IconAndTextWidget(
-                                    icon: Icons.location_on,
-                                    text: "1.7km",
-                                    iconColor: AppColors.mainColor,
-                                  ),
-                                  IconAndTextWidget(
-                                    icon: Icons.access_time,
-                                    text: "32min",
-                                    iconColor: AppColors.iconColor2,
-                                  ),
-                                ],
-                              ),
-                            ],
+                          borderRadius: BorderRadius.circular(Dimensions.radius20),
+                          color: Colors.white38,
+                          image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                                ? NetworkImage(product.imageUrl!)
+                                : AssetImage("assets/images/image1.png") as ImageProvider,
                           ),
                         ),
                       ),
-                    )
-                  ],
+                      Expanded(
+                        child: Container(
+                          height: Dimensions.listViewTextContsize,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(Dimensions.radius20),
+                              bottomRight: Radius.circular(Dimensions.radius20),
+                            ),
+                            color: Colors.white,
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              left: Dimensions.width10,
+                              right: Dimensions.width10,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                BigText(text: product.name),
+                                SizedBox(height: Dimensions.height10),
+                                SmallText(text: product.description),
+                                SizedBox(height: Dimensions.height10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    BigText(text: product.price.toString(), color: Colors.red),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
+              );
+            },
+          ),
       ],
     );
   }
 
+  // Page item builder for the slider
   Widget _buildPageItem(int index) {
-    Matrix4 matrix = new Matrix4.identity();
+    Matrix4 matrix = Matrix4.identity();
     if (index == _currpapevalue.floor()) {
       var currScale = 1 - (_currpapevalue - index) * (1 - _scaleFactory);
       var currTrans = _height * (1 - currScale) / 2;
@@ -211,8 +234,7 @@ class _FoodPageBodyState extends State<FoodPageBody> {
       matrix = Matrix4.diagonal3Values(1, currScale, 1)
         ..setTranslationRaw(0, currTrans, 0);
     } else if (index == _currpapevalue.floor() + 1) {
-      var currScale =
-          _scaleFactory + (_currpapevalue - index + 1) * (1 - _scaleFactory);
+      var currScale = _scaleFactory + (_currpapevalue - index + 1) * (1 - _scaleFactory);
       var currTrans = _height * (1 - currScale) / 2;
 
       matrix = Matrix4.diagonal3Values(1, currScale, 1)
@@ -248,9 +270,7 @@ class _FoodPageBodyState extends State<FoodPageBody> {
                 borderRadius: BorderRadius.circular(30),
                 color: index.isEven ? Color(0xFF69c5df) : Color(0xFF9294cc),
                 image: DecorationImage(
-                  image: AssetImage(
-                    "assets/images/images3.png",
-                  ),
+                  image: AssetImage("assets/images/images3.png"),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -282,13 +302,8 @@ class _FoodPageBodyState extends State<FoodPageBody> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      BigText(
-                        text: "CHINESE SIDE",
-                        size: 25,
-                      ),
-                      SizedBox(
-                        height: Dimensions.height10,
-                      ),
+                      BigText(text: "CHINESE SIDE", size: 25),
+                      SizedBox(height: Dimensions.height10),
                       Row(
                         children: [
                           Wrap(
@@ -308,9 +323,7 @@ class _FoodPageBodyState extends State<FoodPageBody> {
                           SmallText(text: "comments"),
                         ],
                       ),
-                      SizedBox(
-                        height: Dimensions.height10,
-                      ),
+                      SizedBox(height: Dimensions.height10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -343,7 +356,6 @@ class _FoodPageBodyState extends State<FoodPageBody> {
   }
 }
 
-// Product Model
 class Product {
   final int id;
   final String name;
@@ -378,78 +390,6 @@ class Product {
       saucePrice: double.tryParse(json['sauce_price'].toString()) ?? 0.0,
       categoryName: json['category_name'],
       imageUrl: json['image_url'],
-    );
-  }
-}
-
-class CategoryWidget extends StatelessWidget {
-  final Function(String) onCategorySelected;
-
-  const CategoryWidget({super.key, required this.onCategorySelected});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(
-        vertical: Dimensions.height20,
-        horizontal: Dimensions.width20,
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _buildCategoryItem(context, "assets/images/images3.png", "Burgers"),
-            _buildCategoryItem(context, "assets/images/images4.png", "Pizza"),
-            _buildCategoryItem(context, "assets/images/images5.png", "Drinks"),
-            _buildCategoryItem(context, "assets/images/images1.png", "Desserts"),
-            _buildCategoryItem(context, "assets/images/pizza2.png", "Combo"),
-            _buildCategoryItem(context, "assets/images/burger3.png", "Khuyến Mãi"),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCategoryItem(BuildContext context, String imagePath, String categoryName) {
-    return GestureDetector(
-      onTap: () {
-        onCategorySelected(categoryName);
-      },
-      child: Padding(
-        padding: EdgeInsets.only(right: Dimensions.width20),
-        child: Column(
-          children: [
-            Container(
-              width: 70,
-              height: 70,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-                image: DecorationImage(
-                  image: AssetImage(imagePath),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            SizedBox(height: 12),
-            Text(
-              categoryName,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

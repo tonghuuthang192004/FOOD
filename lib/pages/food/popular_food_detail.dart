@@ -7,27 +7,17 @@ import '../../widgets/app_column.dart';
 import '../../widgets/big_text.dart';
 import '../../widgets/exandable_text.dart';
 import '../home/food_page_body.dart';
-import '../home/main_food_page.dart'; // Import your MainFoodPage
-
 class PopularFoodDetail extends StatefulWidget {
-  const PopularFoodDetail({super.key,});
+  final Product product;
+  const PopularFoodDetail({Key? key, required this.product}) : super(key: key);
 
   @override
   _PopularFoodDetailState createState() => _PopularFoodDetailState();
 }
 
 class _PopularFoodDetailState extends State<PopularFoodDetail> {
-  int _quantity = 0;
-  double _price = 10.0; // Base price
 
-  // Method to update the quantity and price
-  void _updateQuantity(int value) {
-    setState(() {
-      _quantity += value;
-      if (_quantity < 0) _quantity = 0; // Prevent negative quantity
-      _price = 10.0 * _quantity; // Update price based on quantity
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -39,14 +29,19 @@ class _PopularFoodDetailState extends State<PopularFoodDetail> {
             left: 0,
             right: 0,
             child: Container(
+
               width: double.maxFinite,
               height: Dimensions.popularFoodImage,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                   image: DecorationImage(
-                      image: AssetImage("assets/images/images1.png"),
-                      fit: BoxFit.cover)),
+                      image: widget.product.imageUrl != null
+                          ? NetworkImage(widget.product.imageUrl!)
+                          : AssetImage("assets/images/image1.png") as ImageProvider,
+                      fit: BoxFit.cover)
+              ),
             ),
           ),
+
           Positioned(
               left: 0,
               right: 0,
@@ -65,9 +60,15 @@ class _PopularFoodDetailState extends State<PopularFoodDetail> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      AppColumn(
-                        text: "Chinese Side",
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          BigText(text: widget.product.name,size: Dimensions.font26,),
+                          BigText(text: widget.product.price.toString(),size: Dimensions.font26,)
+                        ],
                       ),
+
+                      AppColumn(),
                       SizedBox(
                         height: Dimensions.height20,
                       ),
@@ -76,7 +77,7 @@ class _PopularFoodDetailState extends State<PopularFoodDetail> {
                           child: SingleChildScrollView(
                               child: ExpandableText(
                                 text:
-                                "KFC là một trong những chuỗi cửa hàng thức ăn nhanh đầu tiên mở rộng thị phần quốc tế, với nhiều cửa hàng ở Canada, Vương quốc Anh, Mexico và Jamaica vào giữa những năm 60. Trong suốt thập niên 70 và 80, KFC phải trải qua nhiều sự thay đổi về chủ quyền sở hữu công ty hoặc gặp nhiều khó khăn trong việc kinh doanh nhà hàng. Đầu những năm 70, KFC được bán cho Heublein, trước khi sang nhượng lại cho PepsiCo ,Sản phẩm gốc của KFC là những miếng gà rán truyền thống Original Recipe, được khám phá bởi Sanders với Công thức 11 loại thảo mộc và gia vị. Công thức đó đến nay vẫn là một bí mật thương mại. Những phần gà lớn sẽ được phục vụ trong một chiếc xô gà - đã trở thành một điểm nhấn đặc biệt của nhà hàng kể từ khi giới thiệu lần đầu tiên bởi Pete Harman vào năm 1957.",
+                                  widget.product.description
                               ))),
                     ],
                   ))),
@@ -98,6 +99,7 @@ class _PopularFoodDetailState extends State<PopularFoodDetail> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+
             // Add to Cart Button
             GestureDetector(
               onTap: () {
