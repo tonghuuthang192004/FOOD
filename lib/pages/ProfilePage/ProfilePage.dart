@@ -1,246 +1,165 @@
 import 'package:flutter/material.dart';
-import 'package:onthi/utils/color.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../../ChangePasswordPage/ChangePasswordPage.dart';
+import '../../MyOrdersPage/MyOrdersPage.dart';
+import '../../OrderHistoryPage/OrderHistoryPage.dart';
+import '../../UpdateProfilePage/UpdateProfilePage.dart';
+import '../login/login.dart';
 
-class Profile extends StatelessWidget {
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          body: Container(color: AppColors.mainColor,
-            child: Column(
-              children: [
-                const SizedBox(
-                  height: 15,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Thông tin cá nhân',style: TextStyle(color: Colors.white),),
+        backgroundColor: Colors.deepOrange, // Màu cam deep
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: ListView(
+          children: [
+            // Avatar ở giữa trang
+            Center(
+              child: CircleAvatar(
+                radius: 70,
+                backgroundImage: AssetImage("assets/images/avatar.png"), // Sử dụng AssetImage để lấy ảnh từ assets
+                backgroundColor: Colors.grey.shade200,
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Tên người dùng
+            Center(
+              child: Text(
+                'Nguyễn Văn A', // Thay đổi tên người dùng thực tế
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrange,
                 ),
-                const ListTile(
-                  leading: Icon(Icons.arrow_back),
-                  trailing: Icon(Icons.menu),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    CircleAvatar(
-                      maxRadius: 65,
-                      backgroundImage: AssetImage("assets/images/avatar.png"),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    // CircleAvatar(
-                    //   backgroundImage: AssetImage("assets/download.png"),
-                    // ),
-                    // SizedBox(
-                    //   width: 15,
-                    // ),
-                    // CircleAvatar(
-                    //   backgroundImage:
-                    //   AssetImage("assets/GooglePlus-logo-red.png"),
-                    // ),
-                    // SizedBox(
-                    //   width: 15,
-                    // ),
-                    // CircleAvatar(
-                    //   backgroundImage: AssetImage(
-                    //       "assets/1_Twitter-new-icon-mobile-app.jpg"),
-                    // ),
-                    // SizedBox(
-                    //   width: 15,
-                    // ),
-                    // CircleAvatar(
-                    //   backgroundImage:
-                    //   AssetImage("assets/600px-LinkedIn_logo_initials.png"),
-                    // )
-                  ],
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text(
-                      "Thomas Shelby",
-                      style:
-                      TextStyle(fontWeight: FontWeight.w900, fontSize: 26),
-                    )
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [Text("@peakyBlinders")],
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text(
-                      "Master manipulator, deal-maker and\n                   entrepreneur",
-                      style: TextStyle(fontSize: 20),
-                    )
-                  ],
-                ),const SizedBox(
-                  height: 15,
-                ),
-                Container(
-                  child: Expanded(
-                      child: ListView(
-                        children: [
-                          Card(
-                            margin:
-                            const EdgeInsets.only(left: 35, right: 35, bottom: 10),
-                            color: Colors.white70,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                            child: const ListTile(
-                              leading: Icon(
-                                Icons.privacy_tip_sharp,
-                                color: Colors.black54,
-                              ),
-                              title: Text(
-                                'Privacy',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              trailing: Icon(
-                                Icons.arrow_forward_ios_outlined,
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Card(
-                            color: Colors.white70,
-                            margin:
-                            const EdgeInsets.only(left: 35, right: 35, bottom: 10),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                            child: const ListTile(
-                              leading: Icon(
-                                Icons.history,
-                                color: Colors.black54,
-                              ),
-                              title: Text(
-                                'Purchase History',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              trailing: Icon(
-                                Icons.arrow_forward_ios_outlined,
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Card(
-                            color: Colors.white70,
-                            margin:
-                            const EdgeInsets.only(left: 35, right: 35, bottom: 10),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                            child: const ListTile(
-                              leading:
-                              Icon(Icons.help_outline, color: Colors.black54),
-                              title: Text(
-                                'Help & Support',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              trailing: Icon(
-                                Icons.arrow_forward_ios_outlined,
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Card(
-                            color: Colors.white70,
-                            margin:
-                            const EdgeInsets.only(left: 35, right: 35, bottom: 10),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                            child: ListTile(
-                              leading: const Icon(
-                                Icons.privacy_tip_sharp,
-                                color: Colors.black54,
-                              ),
-                              title: ElevatedButton(
-                                onPressed: (){},
-                                child: const Text(
-                                  'Settings',
-                                  style: TextStyle(
-                                      fontSize: 18, fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              trailing: const Icon(Icons.arrow_forward_ios_outlined),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Card(
-                            color: Colors.white70,
-                            margin:
-                            const EdgeInsets.only(left: 35, right: 35, bottom: 10),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                            child: const ListTile(
-                              leading: Icon(
-                                Icons.add_reaction_sharp,
-                                color: Colors.black54,
-                              ),
-                              title: Text(
-                                'Invite a Friend',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              trailing: Icon(
-                                Icons.arrow_forward_ios_outlined,
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Card(
-                            color: Colors.white70,
-                            margin:
-                            const EdgeInsets.only(left: 35, right: 35, bottom: 10),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                            child: const ListTile(
-                              leading: Icon(
-                                Icons.logout,
-                                color: Colors.black54,
-                              ),
-                              title: Text(
-                                'Logout',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              trailing: Icon(Icons.arrow_forward_ios_outlined),
-                            ),
-                          )
-                        ],
-                      )),
-                )
-              ],
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // Các nút chức năng
+            _ProfileOption(
+              icon: Icons.history,
+              title: 'Lịch sử mua hàng',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => OrderHistoryPage()),
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+
+            _ProfileOption(
+              icon: Icons.shopping_cart,
+              title: 'Đơn hàng của tôi',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MyOrdersPage()),
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+
+            _ProfileOption(
+              icon: Icons.lock,
+              title: 'Đổi mật khẩu',
+              onPressed: () {
+                // Thực hiện hành động mở trang đổi mật khẩu
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ChangePasswordPage()),
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+
+            _ProfileOption(
+              icon: Icons.edit,
+              title: 'Cập nhật thông tin',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => UpdateProfilePage()),
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+
+            _ProfileOption(
+              icon: Icons.exit_to_app,
+              title: 'Đăng xuất',
+              onPressed: () {
+                // Thực hiện hành động đăng xuất
+                Fluttertoast.showToast(
+                  msg: "Đăng xuất thành công!",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                  backgroundColor: Colors.green,
+                  textColor: Colors.white,
+                  fontSize: 16.0,
+                );
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()), // Đảm bảo rằng bạn đã tạo LoginPage
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileOption extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final VoidCallback onPressed;
+
+  const _ProfileOption({
+    required this.icon,
+    required this.title,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Color(0xFFFB8C00), backgroundColor: Colors.white, // Màu cam deep cho text và icon
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.deepOrange, width: 2),
+        ),
+        elevation: 5, // Tạo độ nổi cho nút
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.deepOrange), // Màu cam deep cho icon
+          const SizedBox(width: 16),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.deepOrange, // Màu cam deep cho text
             ),
           ),
-        ));
+        ],
+      ),
+    );
   }
 }
