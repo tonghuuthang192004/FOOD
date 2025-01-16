@@ -12,7 +12,6 @@ class RegisterPage extends StatefulWidget {
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
-
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _tenController = TextEditingController();
@@ -20,7 +19,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final _matKhauController = TextEditingController();
   final _soDienThoaiController = TextEditingController();
 
-  // Form validation methods
   String? validateName(String? value) {
     if (value == null || value.isEmpty) {
       return 'Name is required';
@@ -67,7 +65,6 @@ class _RegisterPageState extends State<RegisterPage> {
           'ngay_tao': DateTime.now().toIso8601String(),
         });
 
-
         if (response.statusCode == 200) {
           var data = json.decode(response.body);
           if (data["success"] == true) {
@@ -75,11 +72,10 @@ class _RegisterPageState extends State<RegisterPage> {
               msg: "Registration successful!",
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.CENTER,
-              backgroundColor: Colors.blue,
+              backgroundColor: Colors.deepOrange,
               textColor: Colors.white,
               fontSize: 16.0,
             );
-
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => LoginPage()),
@@ -105,30 +101,15 @@ class _RegisterPageState extends State<RegisterPage> {
           );
         }
       } catch (e) {
-        print("Error: $e");
         Fluttertoast.showToast(
-          msg: 'Registration successful!',
+          msg: 'Error: Unable to register',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.CENTER,
-          backgroundColor: Colors.green,
+          backgroundColor: Colors.red,
           textColor: Colors.white,
           fontSize: 16.0,
         );
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => LoginPage()),
-        );
       }
-    } else {
-      Fluttertoast.showToast(
-        msg: 'Please fill in all fields correctly.',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
     }
   }
 
@@ -137,113 +118,142 @@ class _RegisterPageState extends State<RegisterPage> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: BackGround(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Register'.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: size.height * 0.1),
+                Container(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Create Account',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepOrange,
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 10),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _tenController,
-                      validator: validateName,
-                      decoration: InputDecoration(
-                        labelText: 'Name',
-                        labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                SizedBox(height: 10),
+                Text(
+                  'Sign up to get started!',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
+                SizedBox(height: 30),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _tenController,
+                        validator: validateName,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.person, color: Colors.deepOrange),
+                          labelText: 'Name',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    TextFormField(
-                      controller: _soDienThoaiController,
-                      keyboardType: TextInputType.number,
-                      validator: validatePhone,
-                      decoration: InputDecoration(
-                        labelText: 'Mobile Number',
-                        labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                      SizedBox(height: 15),
+                      TextFormField(
+                        controller: _soDienThoaiController,
+                        keyboardType: TextInputType.number,
+                        validator: validatePhone,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.phone, color: Colors.deepOrange),
+                          labelText: 'Mobile Number',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    TextFormField(
-                      controller: _emailController,
-                      validator: validateEmail,
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                      SizedBox(height: 15),
+                      TextFormField(
+                        controller: _emailController,
+                        validator: validateEmail,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.email, color: Colors.deepOrange),
+                          labelText: 'Email',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    TextFormField(
-                      controller: _matKhauController,
-                      obscureText: true,
-                      validator: validatePassword,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                      SizedBox(height: 15),
+                      TextFormField(
+                        controller: _matKhauController,
+                        obscureText: true,
+                        validator: validatePassword,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.lock, color: Colors.deepOrange),
+                          labelText: 'Password',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 50),
-                    ElevatedButton(
-                      onPressed: () {
-                        dangky();
-
-
-
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        height: 50.0,
-                        width: size.width,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(80.0),
-                          gradient: LinearGradient(
-                            colors: [Color.fromARGB(255, 255, 136, 34), Color.fromARGB(255, 255, 177, 41)],
+                      SizedBox(height: 30),
+                      ElevatedButton(
+                        onPressed: dangky,
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: Text(
-                          'SIGN UP',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        child: Container(
+                          alignment: Alignment.center,
+                          height: 50.0,
+                          width: size.width * 0.8,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.deepOrange,
+                                Colors.orangeAccent,
+                              ],
+                            ),
+                          ),
+                          child: Text(
+                            'SIGN UP',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Already have an account?', style: TextStyle(color: Colors.black)),
-                  SizedBox(width: 10),
-                  GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => LoginPage()),
-                    ),
-                    child: Text(
-                      'Sign in',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
-                    ),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Already have an account?',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                          SizedBox(width: 5),
+                          GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => LoginPage()),
+                            ),
+                            child: Text(
+                              'Sign in',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.deepOrange,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                    ],
                   ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

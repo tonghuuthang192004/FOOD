@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class FastFoodPaymentScreen extends StatefulWidget {
   @override
   _FastFoodPaymentScreenState createState() => _FastFoodPaymentScreenState();
@@ -19,7 +18,7 @@ class _FastFoodPaymentScreenState extends State<FastFoodPaymentScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Fast Food Payment'),
-        backgroundColor: Colors.orange,
+        backgroundColor: Colors.deepOrange,
         foregroundColor: Colors.white,
         elevation: 1,
         leading: Icon(Icons.arrow_back),
@@ -41,7 +40,10 @@ class _FastFoodPaymentScreenState extends State<FastFoodPaymentScreen> {
                 decoration: InputDecoration(
                   hintText: 'Enter your shipping address',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                  contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.deepOrange, width: 2),
+                  ),
                 ),
               ),
               SizedBox(height: 20),
@@ -96,7 +98,7 @@ class _FastFoodPaymentScreenState extends State<FastFoodPaymentScreen> {
                     print('Total Payment: \$${totalPayment.toStringAsFixed(2)}');
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                    backgroundColor: Colors.deepOrange,
                     padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -121,11 +123,14 @@ class _FastFoodPaymentScreenState extends State<FastFoodPaymentScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          Image.asset(
-            imagePath,
-            width: 50, // Kích thước hình ảnh
-            height: 50,
-            fit: BoxFit.cover,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8.0),
+            child: Image.asset(
+              imagePath,
+              width: 50, // Kích thước hình ảnh
+              height: 50,
+              fit: BoxFit.cover,
+            ),
           ),
           SizedBox(width: 10),
           Expanded(
@@ -153,17 +158,17 @@ class _FastFoodPaymentScreenState extends State<FastFoodPaymentScreen> {
       },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 10),
-        padding: EdgeInsets.all(10),
+        padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
           border: Border.all(color: isSelected ? Colors.orange : Colors.grey),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
           children: [
-            Icon(isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked, color: Colors.orange),
+            Icon(isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked, color: Colors.deepOrange),
             SizedBox(width: 10),
-            Expanded(child: Text(method)),
-            Icon(icon, color: Colors.orange, size: 30),
+            Expanded(child: Text(method, style: TextStyle(fontSize: 16))),
+            Icon(icon, color: Colors.deepOrange, size: 30),
           ],
         ),
       ),

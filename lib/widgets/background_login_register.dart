@@ -35,14 +35,14 @@ class BackGround extends StatelessWidget {
               width: size.width,
             ),
           ),
-          Positioned(
-            top: 50,
-            right: 30,
-            child: Image.asset(
-              'assets/images/main.png',
-              width: 140,
-            ),
-          ),
+          // Positioned(
+          //   top: 50,
+          //   right: 30,
+          //   child: Image.asset(
+          //     'assets/images/main.png',
+          //     width: 140,
+          //   ),
+          // ),
           Positioned(
             bottom: 0,
             left: 0,

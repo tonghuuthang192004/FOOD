@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -92,7 +91,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Đổi mật khẩu')),
+      appBar: AppBar(
+        title: Center(child: const Text('Đổi mật khẩu',style: TextStyle(color: Colors.white),)),
+        backgroundColor: Colors.deepOrange, // Màu cam deep
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
@@ -103,11 +105,16 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               obscureText: _obscureCurrentPassword,
               decoration: InputDecoration(
                 labelText: 'Mật khẩu hiện tại',
-                border: const OutlineInputBorder(),
+                labelStyle: TextStyle(color: Colors.deepOrange), // Màu cam deep cho label
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.deepOrange, width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 suffixIcon: IconButton(
-                  icon: Icon(_obscureCurrentPassword
-                      ? Icons.visibility
-                      : Icons.visibility_off),
+                  icon: Icon(_obscureCurrentPassword ? Icons.visibility : Icons.visibility_off, color: Colors.deepOrange),
                   onPressed: () {
                     setState(() {
                       _obscureCurrentPassword = !_obscureCurrentPassword;
@@ -124,11 +131,16 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               obscureText: _obscureNewPassword,
               decoration: InputDecoration(
                 labelText: 'Mật khẩu mới',
-                border: const OutlineInputBorder(),
+                labelStyle: TextStyle(color: Colors.deepOrange),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.deepOrange, width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 suffixIcon: IconButton(
-                  icon: Icon(_obscureNewPassword
-                      ? Icons.visibility
-                      : Icons.visibility_off),
+                  icon: Icon(_obscureNewPassword ? Icons.visibility : Icons.visibility_off, color: Colors.deepOrange),
                   onPressed: () {
                     setState(() {
                       _obscureNewPassword = !_obscureNewPassword;
@@ -145,11 +157,16 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               obscureText: _obscureConfirmPassword,
               decoration: InputDecoration(
                 labelText: 'Xác nhận mật khẩu mới',
-                border: const OutlineInputBorder(),
+                labelStyle: TextStyle(color: Colors.deepOrange),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.deepOrange, width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 suffixIcon: IconButton(
-                  icon: Icon(_obscureConfirmPassword
-                      ? Icons.visibility
-                      : Icons.visibility_off),
+                  icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off, color: Colors.deepOrange),
                   onPressed: () {
                     setState(() {
                       _obscureConfirmPassword = !_obscureConfirmPassword;
@@ -163,7 +180,17 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             // Change Password Button
             ElevatedButton(
               onPressed: _changePassword,
-              child: const Text('Đổi mật khẩu'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepOrange, // Màu cam deep
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: const Text(
+                'Đổi mật khẩu',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,color: Colors.white),
+              ),
             ),
           ],
         ),
