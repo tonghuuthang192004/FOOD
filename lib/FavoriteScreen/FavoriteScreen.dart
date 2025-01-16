@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../ProductBottomSheetPage/ProductBottomSheetPage.dart';
+import '../pages/food/food_detail.dart';
 
 class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({super.key});
@@ -8,7 +10,7 @@ class FavoriteScreen extends StatefulWidget {
 }
 
 class _FavoriteScreenState extends State<FavoriteScreen> {
-  // Danh sách sản phẩm yêu thích (tạm thời)
+  // List of favorite products
   List<Map<String, String>> favoriteItems = [
     {
       "image": "assets/images/images1.png",
@@ -27,20 +29,20 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     },
   ];
 
-  // Danh sách sản phẩm sau khi lọc
+  // List of filtered favorite items
   List<Map<String, String>> filteredItems = [];
 
   @override
   void initState() {
     super.initState();
-    filteredItems = favoriteItems; // Mặc định hiển thị tất cả sản phẩm
+    filteredItems = favoriteItems; // Show all products by default
   }
 
-  // Hàm lọc sản phẩm theo tên
+  // Filter products by name
   void _filterSearchResults(String query) {
     if (query.isEmpty) {
       setState(() {
-        filteredItems = favoriteItems; // Hiển thị tất cả sản phẩm khi không có từ khóa tìm kiếm
+        filteredItems = favoriteItems;
       });
     } else {
       setState(() {
@@ -64,10 +66,23 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
           ),
         ),
         backgroundColor: Colors.deepOrange,
+        actions: [
+          // Cart icon on app bar
+          IconButton(
+            onPressed: () {
+              // Navigate to cart or handle cart functionality here
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProductBottomSheetPage()),
+              );
+            },
+            icon: const Icon(Icons.shopping_cart, color: Colors.white),
+          ),
+        ],
       ),
       body: Column(
         children: [
-          // Thanh tìm kiếm nằm dưới AppBar
+          // Search bar
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
@@ -85,7 +100,7 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
               ),
             ),
           ),
-          // Danh sách sản phẩm sau khi lọc
+          // List of favorite products
           filteredItems.isEmpty
               ? const Center(
             child: Text(
@@ -130,21 +145,52 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                         color: Colors.grey,
                       ),
                     ),
-                    trailing: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          filteredItems.removeAt(index);
-                          favoriteItems.removeAt(index); // Remove from both lists
-                        });
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text("${item['name']} removed from favorites"),
-                        ));
-                      },
-                      icon: const Icon(
-                        Icons.delete,
-                        color: Colors.red,
-                      ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Cart icon for adding the product to the cart
+                        IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      ProductBottomSheetPage()), // Navigate to the cart page
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.shopping_cart,
+                            color: Colors.deepOrange,
+                          ),
+                        ),
+                        const SizedBox(width: 8), // Add some spacing between icons
+                        // Delete icon for removing from favorites
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              filteredItems.removeAt(index);
+                              favoriteItems.removeAt(index); // Remove from both lists
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text("${item['name']} removed from favorites"),
+                            ));
+                          },
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
                     ),
+                    onTap: () {
+                      // Navigate to product detail page on tap
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RecommendFoodDetail(),
+                        ),
+                      );
+                    },
                   ),
                 );
               },

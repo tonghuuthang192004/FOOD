@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../ProductBottomSheetPage/ProductBottomSheetPage.dart';
+import '../pages/food/food_detail.dart';
 
 class PromotionPage extends StatefulWidget {
   @override
@@ -56,6 +58,26 @@ class _PromotionPageState extends State<PromotionPage> {
     }
   }
 
+  // Hàm để mở trang chi tiết sản phẩm
+  void _openProductDetails(Map<String, dynamic> item) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RecommendFoodDetail(),
+      ),
+    );
+  }
+
+  // Hàm để mở ProductBottomSheetPage
+  void _openBottomSheet() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProductBottomSheetPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,83 +113,84 @@ class _PromotionPageState extends State<PromotionPage> {
                 final item = filteredItems[index];
                 final discountedPrice = item['price'] - (item['price'] * item['discount']);
 
-                return Card(
-                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  elevation: 5,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Hình ảnh sản phẩm
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Image.asset(
-                            item['image'],
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
+                return GestureDetector(
+                  onTap: () => _openProductDetails(item), // Navigate on tap
+                  child: Card(
+                    margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    elevation: 5,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Hình ảnh sản phẩm
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.asset(
+                              item['image'],
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Tên sản phẩm
-                              Text(
-                                item['name'],
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              SizedBox(height: 8),
-                              // Giá gốc và giá giảm
-                              Row(
-                                children: [
-                                  Text(
-                                    '${item['oldPrice']}đ',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      decoration: TextDecoration.lineThrough,
-                                      color: Colors.grey,
-                                    ),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Tên sản phẩm
+                                Text(
+                                  item['name'],
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    '${discountedPrice.toStringAsFixed(0)}đ',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.red, // Màu đỏ cho giá giảm
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 8),
-                              // Phần trăm giảm giá
-                              Text(
-                                'Giảm ${((item['discount'] * 100)).toInt()}%',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.deepOrange,
-                                  fontWeight: FontWeight.bold,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
-                            ],
+                                SizedBox(height: 8),
+                                // Giá gốc và giá giảm
+                                Row(
+                                  children: [
+                                    Text(
+                                      '${item['oldPrice']}đ',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        decoration: TextDecoration.lineThrough,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '${discountedPrice.toStringAsFixed(0)}đ',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.red, // Màu đỏ cho giá giảm
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                // Phần trăm giảm giá
+                                Text(
+                                  'Giảm ${((item['discount'] * 100)).toInt()}%',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.deepOrange,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        // Nút mua hàng
-                        IconButton(
-                          icon: Icon(Icons.shopping_cart, color: Colors.deepOrange),
-                          onPressed: () {
-
-                          },
-                        ),
-                      ],
+                          // Nút mua hàng
+                          IconButton(
+                            icon: Icon(Icons.shopping_cart, color: Colors.deepOrange),
+                            onPressed: _openBottomSheet, // Navigate to ProductBottomSheetPage
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );

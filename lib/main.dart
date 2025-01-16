@@ -17,8 +17,8 @@ import 'package:onthi/widgets/app_column.dart';
 import 'ChangePasswordPage/ChangePasswordPage.dart';
 import 'EditProfilePage/profile.dart';
 import 'ProductBottomSheetPage/ProductBottomSheetPage.dart';
-import 'admin/OrderListWithFilter.dart';
-import 'admin/Order_List_Screen.dart';
+
+import 'admin/AdminOrderPage.dart';
 import 'cart/cart.dart';
 
 void main() {
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
       ),
-      home:RecommendFoodDetail(),
+      home:AdminOrderPage(),
     );
   }
 }

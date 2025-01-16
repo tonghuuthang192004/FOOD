@@ -35,6 +35,15 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
       'status': 'Đã giao',
       'image': 'assets/images/images1.png',
     },
+    {
+      'orderId': 'ORD004',
+      'productName': 'Vegan Burger (Burger Chay + Nước Cam)',
+      'quantity': 1,
+      'price': 120000,
+      'date': '2025-01-15',
+      'status': 'Đã hủy',
+      'image': 'assets/images/images2.png',
+    },
   ];
 
   List<Map<String, dynamic>> filteredOrders = [];
@@ -43,26 +52,25 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
   @override
   void initState() {
     super.initState();
-    filteredOrders = allOrders; // Mặc định hiển thị tất cả đơn hàng
+    filteredOrders = allOrders; // Default display all orders
   }
 
   void filterOrders(String? status) {
     setState(() {
       selectedStatus = status;
       if (status == null || status == 'Tất cả') {
-        filteredOrders = allOrders;
+        filteredOrders = allOrders; // Show all orders if "All" is selected
       } else {
         filteredOrders = allOrders
             .where((order) => order['status'] == status)
-            .toList();
+            .toList(); // Filter based on selected status
       }
     });
   }
 
-  // Hàm hủy đơn hàng
   void cancelOrder(int index) {
     setState(() {
-      filteredOrders[index]['status'] = 'Đã hủy';
+      filteredOrders[index]['status'] = 'Đã hủy'; // Cancel the order
     });
   }
 
@@ -70,7 +78,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Thêm gradient cho AppBar
+        // Add gradient to the AppBar
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -88,142 +96,208 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
             color: Colors.white,
           ),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: DropdownButton<String>(
-              value: selectedStatus,
-              onChanged: (String? newStatus) {
-                filterOrders(newStatus);
-              },
-              hint: Text(
-                'Lọc trạng thái',
-                style: TextStyle(color: Colors.white),
-              ),
-              items: [
-                'Tất cả',
-                'Đã giao',
-                'Đang giao',
-                'Đã hủy',
-              ].map((status) {
-                return DropdownMenuItem<String>(
-                  value: status,
-                  child: Text(status, style: TextStyle(color: Colors.white)),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: filteredOrders.isEmpty
-          ? Center(child: Text('Không có đơn hàng nào để hiển thị'))
-          : ListView.builder(
-        itemCount: filteredOrders.length,
-        itemBuilder: (context, index) {
-          final order = filteredOrders[index];
-          return Card(
-            margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.asset(
-                      order['image'],
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
+      body: Column(
+        children: [
+          // Row with 4 columns for status filtering (Including "Đã hủy")
+          Row(
+            children: [
+              // Column 1: Tất cả (All Orders)
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => filterOrders('Tất cả'),
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    color: selectedStatus == 'Tất cả' ? Colors.orange : Colors.grey[200],
+                    child: Center(
+                      child: Text(
+                        'Tất cả',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: selectedStatus == 'Tất cả' ? Colors.white : Colors.black,
+                        ),
+                      ),
                     ),
                   ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                ),
+              ),
+              // Column 2: Đã giao (Delivered)
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => filterOrders('Đã giao'),
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    color: selectedStatus == 'Đã giao' ? Colors.green : Colors.grey[200],
+                    child: Center(
+                      child: Text(
+                        'Đã giao',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: selectedStatus == 'Đã giao' ? Colors.white : Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // Column 3: Đang giao (In Progress)
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => filterOrders('Đang giao'),
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    color: selectedStatus == 'Đang giao' ? Colors.orangeAccent : Colors.grey[200],
+                    child: Center(
+                      child: Text(
+                        'Đang giao',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: selectedStatus == 'Đang giao' ? Colors.white : Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // Column 4: Đã hủy (Cancelled)
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => filterOrders('Đã hủy'),
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    color: selectedStatus == 'Đã hủy' ? Colors.red : Colors.grey[200],
+                    child: Center(
+                      child: Text(
+                        'Đã hủy',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: selectedStatus == 'Đã hủy' ? Colors.white : Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // List of filtered orders
+          filteredOrders.isEmpty
+              ? Center(child: Text('Không có đơn hàng nào để hiển thị'))
+              : Expanded(
+            child: ListView.builder(
+              itemCount: filteredOrders.length,
+              itemBuilder: (context, index) {
+                final order = filteredOrders[index];
+                return Card(
+                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Row(
                       children: [
-                        Text(
-                          order['productName'],
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Tổng giá: ${order['price'] * order['quantity']}đ',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.red,
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.asset(
+                            order['image'],
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
                           ),
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Trạng thái: ${order['status']}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: order['status'] == 'Đã giao'
-                                ? Colors.green
-                                : order['status'] == 'Đã hủy'
-                                ? Colors.red
-                                : Colors.orange,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Nút chi tiết đơn hàng
-                  IconButton(
-                    icon: Icon(Icons.arrow_forward, color: Colors.deepOrange),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => OrderDetailPage(order: order),
-                        ),
-                      );
-                    },
-                  ),
-                  // Nút hủy đơn hàng
-                  if (order['status'] != 'Đã hủy') ...[
-                    IconButton(
-                      icon: Icon(Icons.cancel, color: Colors.red),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('Xác nhận hủy đơn hàng'),
-                            content: Text(
-                                'Bạn có chắc chắn muốn hủy đơn hàng này không?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: Text('Hủy'),
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                order['productName'],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              TextButton(
-                                onPressed: () {
-                                  cancelOrder(index); // Hủy đơn hàng
-                                  Navigator.pop(context);
-                                },
-                                child: Text('Xác nhận'),
+                              SizedBox(height: 8),
+                              Text(
+                                'Tổng giá: ${order['price'] * order['quantity']}đ',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.red,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                'Trạng thái: ${order['status']}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: order['status'] == 'Đã giao'
+                                      ? Colors.green
+                                      : order['status'] == 'Đã hủy'
+                                      ? Colors.red
+                                      : Colors.orange,
+                                ),
                               ),
                             ],
                           ),
-                        );
-                      },
+                        ),
+                        // Button to view order details
+                        IconButton(
+                          icon: Icon(Icons.arrow_forward, color: Colors.deepOrange),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => OrderDetailPage(order: order),
+                              ),
+                            );
+                          },
+                        ),
+                        // Button to cancel the order
+                        if (order['status'] != 'Đã hủy') ...[
+                          IconButton(
+                            icon: Icon(Icons.cancel, color: Colors.red),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text('Xác nhận hủy đơn hàng'),
+                                  content: Text(
+                                      'Bạn có chắc chắn muốn hủy đơn hàng này không?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text('Hủy'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        cancelOrder(index); // Cancel the order
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text('Xác nhận'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ],
                     ),
-                  ],
-                ],
-              ),
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }

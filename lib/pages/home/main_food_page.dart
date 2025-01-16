@@ -15,7 +15,8 @@ class MainFoodPage extends StatefulWidget {
 }
 
 class _MainFoodPageState extends State<MainFoodPage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 0;  // To keep track of selected index
+
   String searchQuery = '';  // Variable to store search query
   final TextEditingController _controller = TextEditingController();
 
@@ -35,24 +36,38 @@ class _MainFoodPageState extends State<MainFoodPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: IndexedStack(  // Keeps the pages in the stack and switches between them based on the selected index
+        index: _selectedIndex,
         children: [
-          // Header with search bar
-          Container(
-            margin: const EdgeInsets.only(top: 45, bottom: 15),
-            padding: EdgeInsets.symmetric(horizontal: Dimensions.width20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(child: Header()),  // Search bar
-              ],
-            ),
+          // Home Page content
+          Column(
+            children: [
+              // Header with search bar
+              Container(
+                margin: const EdgeInsets.only(top: 45, bottom: 15),
+                padding: EdgeInsets.symmetric(horizontal: Dimensions.width20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(child: Header()),  // Search bar
+                  ],
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: FoodPageBody(searchQuery: searchQuery),  // Pass search query to FoodPageBody
+                ),
+              ),
+            ],
           ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: FoodPageBody(searchQuery: searchQuery),  // Pass search query to FoodPageBody
-            ),
-          ),
+          // Promotion Page content
+          PromotionPage(),
+          // Favorite Screen content
+          FavoriteScreen(),
+          // Shopping Cart Page content
+          ShoppingCartPage(),
+          // Profile Page content
+          ProfilePage(),
         ],
       ),
       bottomNavigationBar: BottomNavigation(),  // Bottom navigation bar
@@ -60,7 +75,6 @@ class _MainFoodPageState extends State<MainFoodPage> {
   }
 
   // Header with search bar
-  // Header with a modern search bar and improved avatar design
   Widget Header() {
     return Row(
       children: [
@@ -95,7 +109,6 @@ class _MainFoodPageState extends State<MainFoodPage> {
         ),
         SizedBox(width: 20),  // Space between the search bar and avatar
 
-        // Avatar with circular background and subtle border
         GestureDetector(
           // onTap: () {
           //   Navigator.push(context, MaterialPageRoute(builder: (context) => Profile()));  // Navigate to profile page
@@ -128,7 +141,6 @@ class _MainFoodPageState extends State<MainFoodPage> {
     );
   }
 
-
   // Bottom navigation bar with custom styling
   Widget BottomNavigation() {
     return BottomNavigationBar(
@@ -147,20 +159,11 @@ class _MainFoodPageState extends State<MainFoodPage> {
       ],
     );
   }
+
+  // Handle bottom navigation item tap
   void onTapNav(int index) {
-    if(index == 1){
-      Navigator.push(context, MaterialPageRoute(builder: (context) => PromotionPage()));
-    }
-    if(index == 2){
-      Navigator.push(context, MaterialPageRoute(builder: (context) => FavoriteScreen()));
-    }else if(index == 3){
-      Navigator.push(context, MaterialPageRoute(builder: (context) => ShoppingCartPage()));
-    }else if (index == 4) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
-    } else {
-      setState(() {
-        _selectedIndex = index;
-      });
-    }
+    setState(() {
+      _selectedIndex = index;  // Update the selected index
+    });
   }
 }
