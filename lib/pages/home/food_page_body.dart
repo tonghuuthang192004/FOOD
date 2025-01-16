@@ -32,7 +32,7 @@ class FoodPageBody extends StatefulWidget {
 }
 
 class _FoodPageBodyState extends State<FoodPageBody> {
-  String connection = "http://192.168.2.5/API/";  // API connection URL
+  String connection = "http://192.168.1.9/API/";  // API connection URL
   List<Product> _products = [];
   List<Product> _filteredProducts = [];
   bool _isLoading = true;

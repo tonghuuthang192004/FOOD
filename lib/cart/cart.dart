@@ -1,205 +1,238 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
-class ShoppingCartPage extends StatefulWidget {
+class CartPage extends StatefulWidget {
+  final int userId;
+
+  CartPage({required this.userId});
+
   @override
-  _ShoppingCartPageState createState() => _ShoppingCartPageState();
+  _CartPageState createState() => _CartPageState();
 }
 
-class _ShoppingCartPageState extends State<ShoppingCartPage> {
-  List<Map<String, dynamic>> cartItems = [
-    {
-      'name': 'Ragu Delight (Khoai Tây Xốt Bò + Coca)',
-      'price': 86350,
-      'image': 'assets/images/images1.png',
-      'quantity': 1
-    },
-    {
-      'name': 'Spicy Chicken Fries (Khoai Tây Gà Xốt Cay + Coca)',
-      'price': 97550,
-      'image': 'assets/images/images1.png',
-      'quantity': 1
-    },
-    {
-      'name': 'Love Mac & Cheese (Double Mac & Cheese)',
-      'price': 148790,
-      'image': 'assets/images/images1.png',
-      'quantity': 1
-    },
-  ];
+class _CartPageState extends State<CartPage> {
+  List<Map<String, dynamic>> cartItems = [];
+  String message = '';
 
-  void increaseQuantity(int index) {
-    setState(() {
-      cartItems[index]['quantity']++;
-    });
+  final String apiUrl = "http://192.168.1.9/API/cart.php";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCartItems();
   }
 
-  void decreaseQuantity(int index) {
-    setState(() {
-      if (cartItems[index]['quantity'] > 1) {
-        cartItems[index]['quantity']--;
+  // Hàm tải giỏ hàng từ API
+  Future<void> _loadCartItems() async {
+    try {
+      final response = await http.get(Uri.parse("$apiUrl?action=get_cart_items&id_nguoi_dung=${widget.userId}"));
+
+      print("Response Status: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = json.decode(response.body);
+
+        print("Cart Items: $data");  // Log cart data
+
+        setState(() {
+          cartItems = data.map((item) => Map<String, dynamic>.from(item)).toList();
+        });
+      } else {
+        setState(() {
+          message = 'Lỗi khi tải giỏ hàng';
+        });
       }
-    });
+    } catch (e) {
+      setState(() {
+        message = 'Lỗi kết nối: $e';
+      });
+    }
   }
 
-  void removeItem(int index) {
-    setState(() {
-      cartItems.removeAt(index);
-    });
+  // Hàm cập nhật số lượng sản phẩm trong giỏ
+  Future<void> _updateQuantity(int productId, int quantity) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$apiUrl?action=update_quantity"),
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: {
+          'id_nguoi_dung': widget.userId.toString(),
+          'id_san_pham': productId.toString(),
+          'so_luong': quantity.toString(),
+        },
+      );
+      final result = json.decode(response.body);
+      setState(() {
+        message = result['message'] ?? 'Lỗi khi cập nhật số lượng';
+      });
+      _loadCartItems();
+    } catch (e) {
+      setState(() {
+        message = 'Lỗi kết nối: $e';
+      });
+    }
+  }
+
+  // Hàm xóa sản phẩm khỏi giỏ
+  Future<void> _removeFromCart(int productId) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$apiUrl?action=delete_from_cart"),
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: {
+          'id_nguoi_dung': widget.userId.toString(),
+          'id_san_pham': productId.toString(),
+        },
+      );
+      final result = json.decode(response.body);
+      setState(() {
+        message = result['message'] ?? 'Lỗi khi xóa sản phẩm khỏi giỏ hàng';
+      });
+      _loadCartItems();
+    } catch (e) {
+      setState(() {
+        message = 'Lỗi kết nối: $e';
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-
-    // Tính tổng giá trị giỏ hàng
-    double totalAmount = cartItems.fold(0, (sum, item) => sum + item['price'] * item['quantity']);
+    double totalAmount = cartItems.fold(0, (sum, item) => sum + double.parse(item['gia']) * item['so_luong']);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Giỏ hàng của tôi',style: TextStyle(color: Colors.white),),
-        backgroundColor: Colors.deepOrange, // Màu cam deep
+        title: Text('Giỏ hàng của tôi'),
+        backgroundColor: Colors.deepOrange,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: cartItems.length,
-              itemBuilder: (context, index) {
-                final item = cartItems[index];
-                final totalPrice = item['price'] * item['quantity'];
-
-                return Card(
-                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  elevation: 5,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Image.asset(
-                            item['image'],
-                            width: screenWidth * 0.2, // Chiều rộng hình ảnh ~20% màn hình
-                            height: screenWidth * 0.2,
-                            fit: BoxFit.cover, // Đảm bảo không bị vỡ pixel
-                          ),
-                        ),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item['name'],
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                '${totalPrice}đ',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.deepOrange, // Màu cam deep cho giá
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  IconButton(
-                                    icon: Icon(Icons.remove, color: Colors.deepOrange),
-                                    onPressed: () => decreaseQuantity(index),
-                                  ),
-                                  Text(
-                                    '${item['quantity']}',
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.add, color: Colors.deepOrange),
-                                    onPressed: () => increaseQuantity(index),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => removeItem(index),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          // Tổng giá trị giỏ hàng
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Tổng cộng:',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepOrange, // Màu cam deep cho tổng cộng
-                  ),
-                ),
-                Text(
-                  '${totalAmount}đ',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red, // Màu đỏ cho tổng tiền
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Nút thanh toán đẹp hơn
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: ElevatedButton(
-              onPressed: () {
-                // Xử lý thanh toán
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepOrange, // Màu cam deep cho nút
-                padding: EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30), // Bo tròn góc nút
-                ),
-                elevation: 10, // Tạo bóng đổ cho nút
-                shadowColor: Colors.deepOrange.withOpacity(0.5), // Màu bóng đổ
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            if (message.isNotEmpty)
+              Text(
+                message,
+                style: TextStyle(color: message.contains('Lỗi') ? Colors.red : Colors.green, fontSize: 16),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.payment,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    'Thanh toán',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+            SizedBox(height: 10),
+            Expanded(
+              child: cartItems.isEmpty
+                  ? Center(child: Text('Giỏ hàng trống'))
+                  : ListView.builder(
+                itemCount: cartItems.length,
+                itemBuilder: (context, index) {
+                  final item = cartItems[index];
+                  return Card(
+                    margin: EdgeInsets.symmetric(vertical: 8),
+                    elevation: 8,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
                     ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.network(
+                              item['image_url'],  // Corrected key to 'image_url'
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item['ten'],
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  '${item['gia']} VND',
+                                  style: TextStyle(fontSize: 14, color: Colors.deepOrange),
+                                ),
+                                SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.remove, color: Colors.deepOrange),
+                                      onPressed: () => _updateQuantity(item['id_san_pham'], item['so_luong'] - 1),
+                                    ),
+                                    Text(
+                                      '${item['so_luong']}',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.add, color: Colors.deepOrange),
+                                      onPressed: () => _updateQuantity(item['id_san_pham'], item['so_luong'] + 1),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _removeFromCart(item['id_san_pham']),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Tổng cộng:',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepOrange),
+                  ),
+                  Text(
+                    '$totalAmount VND',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  // Xử lý thanh toán
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepOrange,
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.payment, color: Colors.white),
+                    SizedBox(width: 10),
+                    Text(
+                      'Thanh toán',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

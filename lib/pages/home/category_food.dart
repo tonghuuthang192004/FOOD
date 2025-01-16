@@ -22,7 +22,7 @@ class CategoryWidget extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            _buildCategoryItem(context, "assets/images/burger2.png", "ALL", "0"),
+            _buildCategoryItem(context, "assets/images/burger2.png", "ALL",""),
             _buildCategoryItem(context, "assets/images/burger2.png", "Gà Rán", "1"),
             _buildCategoryItem(context, "assets/images/images4.png", "Pizza", "2"),
             _buildCategoryItem(context, "assets/images/images5.png", "Burger", "3"),

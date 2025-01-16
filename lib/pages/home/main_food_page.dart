@@ -154,7 +154,7 @@ class _MainFoodPageState extends State<MainFoodPage> {
     if(index == 2){
       Navigator.push(context, MaterialPageRoute(builder: (context) => FavoriteScreen()));
     }else if(index == 3){
-      Navigator.push(context, MaterialPageRoute(builder: (context) => ShoppingCartPage()));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => CartPage(userId: 1,)));
     }else if (index == 4) {
       Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage()));
     } else {

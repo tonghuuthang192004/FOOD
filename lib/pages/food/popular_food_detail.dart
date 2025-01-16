@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:onthi/utils/dimensions.dart';
 import 'package:onthi/widgets/app_icon.dart';
+import 'dart:convert';
 
 import '../../utils/color.dart';
 import '../../widgets/app_column.dart';
 import '../../widgets/big_text.dart';
 import '../../widgets/exandable_text.dart';
 import '../home/food_page_body.dart';
+
 class PopularFoodDetail extends StatefulWidget {
   final Product product;
   const PopularFoodDetail({Key? key, required this.product}) : super(key: key);
@@ -16,8 +19,66 @@ class PopularFoodDetail extends StatefulWidget {
 }
 
 class _PopularFoodDetailState extends State<PopularFoodDetail> {
+  String message = "";
 
+  // Thêm sản phẩm vào giỏ hàng
+  Future<void> _addToCart() async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://192.168.1.9/API/cart.php?action=add_to_cart'),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: {
+          'id_nguoi_dung': '1', // ID người dùng, có thể thay đổi
+          'id_san_pham': widget.product.id.toString(),
+          'so_luong': '1', // Giả sử là 1 sản phẩm, có thể thay đổi nếu cần
+        },
+      );
 
+      final result = json.decode(response.body);
+      if (response.statusCode == 200 && result['status'] == 'success') {
+        setState(() {
+          message = result['message'] ?? 'Sản phẩm đã được thêm vào giỏ hàng';
+        });
+
+        // Hiển thị thông báo thành công
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Sản phẩm đã được thêm vào giỏ hàng!"),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        setState(() {
+          message = 'Lỗi khi thêm sản phẩm vào giỏ hàng';
+        });
+
+        // Hiển thị thông báo thất bại
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Lỗi khi thêm sản phẩm vào giỏ hàng!"),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        message = 'Lỗi kết nối: $e';
+      });
+
+      // Hiển thị thông báo lỗi kết nối
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Lỗi kết nối: $e"),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +90,6 @@ class _PopularFoodDetailState extends State<PopularFoodDetail> {
             left: 0,
             right: 0,
             child: Container(
-
               width: double.maxFinite,
               height: Dimensions.popularFoodImage,
               decoration: BoxDecoration(
@@ -63,8 +123,8 @@ class _PopularFoodDetailState extends State<PopularFoodDetail> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          BigText(text: widget.product.name,size: Dimensions.font26,),
-                          BigText(text: widget.product.price.toString(),size: Dimensions.font26,)
+                          BigText(text: widget.product.name, size: Dimensions.font26),
+                          BigText(text: widget.product.price.toString(), size: Dimensions.font26)
                         ],
                       ),
 
@@ -76,8 +136,7 @@ class _PopularFoodDetailState extends State<PopularFoodDetail> {
                       Expanded(
                           child: SingleChildScrollView(
                               child: ExpandableText(
-                                text:
-                                  widget.product.description
+                                  text: widget.product.description
                               ))),
                     ],
                   ))),
@@ -100,12 +159,15 @@ class _PopularFoodDetailState extends State<PopularFoodDetail> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
 
-            // Add to Cart Button
-            GestureDetector(
-              onTap: () {
-                // Implement add to cart functionality here
-                print("Added to cart");
+            // Add to Cart Button with InkWell for effect
+            InkWell(
+              onTap: _addToCart,
+              onHover: (isHovered) {
+                setState(() {
+                  message = isHovered ? "Hovering on Add to Cart" : "";
+                });
               },
+              splashColor: Colors.green,
               child: Container(
                 padding: EdgeInsets.only(
                     top: Dimensions.height10,
@@ -132,12 +194,13 @@ class _PopularFoodDetailState extends State<PopularFoodDetail> {
                 ),
               ),
             ),
-            // Checkout Button
-            GestureDetector(
+            // Checkout Button with InkWell for effect
+            InkWell(
               onTap: () {
                 // Navigate back to MainFoodPage
                 Navigator.pop(context);
               },
+              splashColor: Colors.blue,
               child: Container(
                 padding: EdgeInsets.only(
                     top: Dimensions.height10,
