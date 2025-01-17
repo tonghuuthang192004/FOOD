@@ -9,16 +9,13 @@ import 'package:onthi/pages/login/login.dart';
 import 'package:onthi/pay/payment.dart';
 import 'package:onthi/registerPage/registerPage.dart';
 import 'package:onthi/signup/signin_screen.dart';
-
 import 'package:onthi/welcome/welcome.dart';
-
 import 'package:onthi/widgets/app_column.dart';
-
 import 'ChangePasswordPage/ChangePasswordPage.dart';
 import 'EditProfilePage/profile.dart';
 import 'ProductBottomSheetPage/ProductBottomSheetPage.dart';
-
-import 'admin/AdminOrderPage.dart';
+import 'admin/FastFoodOrderListPage.dart';
+import 'admin/OrderDetailPage.dart';
 import 'cart/cart.dart';
 
 void main() {
@@ -37,7 +34,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
       ),
-      home:AdminOrderPage(),
+      home:FastFoodOrderListPage(),
     );
   }
 }
