@@ -1,22 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../shared_preferences/shared_preferences.dart';  // Đảm bảo import đúng LocalStorage
+
 import '../../ChangePasswordPage/ChangePasswordPage.dart';
 import '../../MyOrdersPage/MyOrdersPage.dart';
 import '../../OrderHistoryPage/OrderHistoryPage.dart';
 import '../../UpdateProfilePage/UpdateProfilePage.dart';
 import '../login/login.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final TextEditingController _nameController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();  // Tải thông tin người dùng khi khởi tạo
+  }
+
+  // Lấy dữ liệu người dùng từ SharedPreferences
+  Future<void> _loadUserData() async {
+    Map<String, String> userData = await LocalStorage.getUserData();
+    if (userData.isNotEmpty) {
+      setState(() {
+        _nameController.text = userData['email'] ?? '';  // Cập nhật tên người dùng
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Thông tin cá nhân',style: TextStyle(color: Colors.white),),
-        backgroundColor: Colors.deepOrange, // Màu cam deep
+        title: const Text('Thông tin cá nhân', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.deepOrange,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -26,17 +50,16 @@ class ProfilePage extends StatelessWidget {
             Center(
               child: CircleAvatar(
                 radius: 70,
-                backgroundImage: AssetImage("assets/images/avatar.png"), // Sử dụng AssetImage để lấy ảnh từ assets
+                backgroundImage: AssetImage("assets/images/avatar.png"), // Avatar mặc định
                 backgroundColor: Colors.grey.shade200,
               ),
             ),
-
             const SizedBox(height: 20),
 
             // Tên người dùng
             Center(
               child: Text(
-                '', // Thay đổi tên người dùng thực tế
+                ' ${_nameController.text}',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -75,7 +98,6 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.lock,
               title: 'Đổi mật khẩu',
               onPressed: () {
-                // Thực hiện hành động mở trang đổi mật khẩu
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ChangePasswordPage()),
@@ -111,7 +133,7 @@ class ProfilePage extends StatelessWidget {
                 );
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => LoginPage()), // Đảm bảo rằng bạn đã tạo LoginPage
+                  MaterialPageRoute(builder: (context) => LoginPage()),
                 );
               },
             ),

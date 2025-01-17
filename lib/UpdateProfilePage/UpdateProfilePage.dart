@@ -12,7 +12,6 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _avatarController = TextEditingController();
 
   // API URL
   final String _apiUrl = "http://192.168.1.9/API/eidtprofile.php"; // Replace with your server URL
@@ -24,19 +23,13 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
 
     // Check if user data is available
     if (userData.isNotEmpty) {
-      // Debugging: Print the user data to check the content
-      print("User Data: $userData");
-
       // Populate the text fields with the fetched user data
       _nameController.text = userData['ten'] ?? '';  // 'ten' key for name
       _phoneController.text = userData['so_dien_thoai'] ?? '';  // 'so_dien_thoai' for phone
       _emailController.text = userData['email'] ?? '';  // 'email' for email
-      _avatarController.text = userData['avatar'] ?? '';  // 'avatar' for avatar
-    } else {
-      // If no data is available, print a warning
-      print("No user data found.");
     }
   }
+
   // Function to send the API request for updating profile
   Future<void> _updateProfile() async {
     // Fetch user ID from local storage
@@ -46,7 +39,6 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
     String name = _nameController.text;
     String phone = _phoneController.text;
     String email = _emailController.text;
-    String avatar = _avatarController.text;
 
     if (name.isEmpty || phone.isEmpty || email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -63,7 +55,6 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
           "ten": name,
           "email": email,
           "so_dien_thoai": phone,
-          "avatar": avatar,
         },
       );
 
@@ -115,8 +106,6 @@ class _UpdateProfilePageState extends State<UpdateProfilePage> {
               _buildTextField("Số điện thoại:", "Nhập số điện thoại của bạn", _phoneController),
               SizedBox(height: 16),
               _buildTextField("Email:", "Nhập email của bạn", _emailController),
-              SizedBox(height: 16),
-              _buildTextField("Avatar:", "Nhập đường dẫn ảnh đại diện", _avatarController),
               SizedBox(height: 30),
 
               // Submit button
