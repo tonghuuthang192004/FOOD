@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../utils/dimensions.dart';
 import '../../utils/color.dart';
@@ -10,6 +11,7 @@ import '../../widgets/exandable_text.dart';
 import '../../shared_preferences/shared_preferences.dart';
 import '../../pages/./home/./food_page_body.dart';
 import '../.././User.dart';
+
 class PopularFoodDetail extends StatefulWidget {
   final Product product;
   PopularFoodDetail({Key? key, required this.product}) : super(key: key);
@@ -18,7 +20,39 @@ class PopularFoodDetail extends StatefulWidget {
 }
 
 class _PopularFoodDetailState extends State<PopularFoodDetail> {
+
   String message = "";
+  Future<void> addToFavorites(int productId) async {
+    Map<String, String> userData = await LocalStorage.getUserData();
+    String userId = userData['id_nguoi_dung'] ?? '';
+
+    if (userId.isEmpty) {
+      throw Exception('User ID không hợp lệ');
+    }
+
+    final url = 'http://192.168.1.9/API/favorite.php?action=add_to_favorites';
+    final response = await http.post(
+      Uri.parse(url),
+      body: {
+        'id_nguoi_dung': userId,
+        'id_san_pham': productId.toString(),
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['status'] == 'success') {
+        print('Sản phẩm đã được thêm vào yêu thích');
+      } else {
+        throw Exception('Lỗi khi thêm sản phẩm vào yêu thích');
+      }
+    } else {
+      throw Exception('Không thể thêm sản phẩm vào yêu thích');
+    }
+  }
+
+
+
 
   // Thêm sản phẩm vào giỏ hàng
   Future<void> _addToCart() async {
@@ -135,12 +169,36 @@ class _PopularFoodDetailState extends State<PopularFoodDetail> {
             top: 40,  // Điều chỉnh vị trí của icon yêu thích từ trên xuống
             right: 10,  // Điều chỉnh vị trí của icon yêu thích từ phải sang
             child: IconButton(
-              icon: Icon(Icons.favorite_border, color: Colors.white, size: 30),
-              onPressed: () {
-                // Xử lý sự kiện khi nhấn vào icon yêu thích
-                // Bạn có thể thêm logic thay đổi trạng thái yêu thích ở đây
+              icon: Icon(
+                  Icons.favorite_border,
+                  color: Colors.white,
+                  size: 30
+              ),
+              onPressed: () async {
+                try {
+                  // Call the API to add the product to favorites
+                  await addToFavorites(widget.product.id);
+
+                  // Show success message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Sản phẩm đã được thêm vào yêu thích!"),
+                      backgroundColor: Colors.green,
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                } catch (e) {
+                  // Show error message if there was an issue
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Không thể thêm sản phẩm vào yêu thích!"),
+                      backgroundColor: Colors.red,
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
               },
-            ),
+            )
           ),
 
 

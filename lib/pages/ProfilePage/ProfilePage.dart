@@ -36,7 +36,7 @@ class ProfilePage extends StatelessWidget {
             // Tên người dùng
             Center(
               child: Text(
-                'Nguyễn Văn A', // Thay đổi tên người dùng thực tế
+                '', // Thay đổi tên người dùng thực tế
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,

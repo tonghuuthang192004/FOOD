@@ -14,6 +14,7 @@ class LocalStorage {
     return {
       'id_nguoi_dung': prefs.getString('id_nguoi_dung') ?? '',
       'ten': prefs.getString('ten') ?? '',
+      'so_dien_thoai': prefs.getString('so_dien_thoai') ?? '',
       'email': prefs.getString('email') ?? '',
     };
   }
