@@ -355,6 +355,42 @@ class _FoodPageBodyState extends State<FoodPageBody> {
     );
   }
 }
+class User {
+  final int id;
+  final String name;
+  final String email;
+  final String password;
+  final String? avatar;
+  final String phoneNumber;
+  final bool status;
+  final DateTime createdAt;
+
+  User({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.password,
+    this.avatar,
+    required this.phoneNumber,
+    required this.status,
+    required this.createdAt,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: int.tryParse(json['id_nguoi_dung'].toString()) ?? 0,
+      name: json['ten'],
+      email: json['email'],
+      password: json['mat_khau'],
+      avatar: json['avatar'],
+      phoneNumber: json['so_dien_thoai'],
+      status: json['trang_thai'] == 1, // Assuming BIT is represented as 1 for true, 0 for false
+      createdAt: DateTime.tryParse(json['ngay_tao']) ?? DateTime.now(),
+    );
+  }
+}
+
+
 
 class Product {
   final int id;
@@ -392,4 +428,5 @@ class Product {
       imageUrl: json['image_url'],
     );
   }
+
 }

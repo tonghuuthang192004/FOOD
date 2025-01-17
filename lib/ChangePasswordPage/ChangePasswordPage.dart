@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../pages/login/login.dart'; // Thay đổi theo đường dẫn đúng của LoginPage
+import '../pages/login/login.dart'; // Ensure the correct path to your LoginPage
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -12,187 +12,242 @@ class ChangePasswordPage extends StatefulWidget {
 }
 
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
-  final TextEditingController _currentPasswordController = TextEditingController();
-  final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController currentPasswordController = TextEditingController();
+  final TextEditingController newPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
-  bool _obscureCurrentPassword = true;
-  bool _obscureNewPassword = true;
-  bool _obscureConfirmPassword = true;
+  // Function to call API to change password
+  Future<void> changePassword(String email, String currentPassword, String newPassword, String confirmPassword, BuildContext context) async {
+    // URL của API PHP
+    final String url = 'http://192.168.1.9/API/changePassword.php';  // Thay đổi URL theo đường dẫn API của bạn
 
-  // Hàm gọi API để thay đổi mật khẩu
-  Future<void> _changePassword() async {
-    // Lấy giá trị từ các controller
-    String currentPassword = _currentPasswordController.text;
-    String newPassword = _newPasswordController.text;
-    String confirmPassword = _confirmPasswordController.text;
+    // Tạo một Map dữ liệu để gửi
+    Map<String, String> data = {
+      'email': email,
+      'current_password': currentPassword,
+      'new_password': newPassword,
+      'confirm_password': confirmPassword,
+    };
 
-    // Kiểm tra nếu các trường mật khẩu trống
-    if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
-      Fluttertoast.showToast(
-        msg: "Vui lòng điền đầy đủ thông tin!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-      return;
-    }
-
-    // Kiểm tra nếu mật khẩu mới và xác nhận mật khẩu không khớp
-    if (newPassword != confirmPassword) {
-      Fluttertoast.showToast(
-        msg: "Mật khẩu mới và xác nhận không khớp!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-      return;
-    }
-
-    // Gửi yêu cầu API để thay đổi mật khẩu
-    var url = Uri.parse("http://192.168.2.5/API/user/change_password.php"); // Đảm bảo đúng URL API
-    var response = await http.post(url, body: {
-      "mat_khau_cu": currentPassword,
-      "mat_khau_moi": newPassword,
-    });
-
-    var data = json.decode(response.body);
-    if (data == "Success") {
-      Fluttertoast.showToast(
-        msg: "Cập nhật mật khẩu thành công!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        fontSize: 16.0,
+    // Gửi yêu cầu POST tới API PHP
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(data), // Mã hóa dữ liệu thành JSON
       );
 
-      // Chuyển hướng đến trang đăng nhập
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginPage()), // Đảm bảo rằng bạn đã tạo LoginPage
-      );
-    } else {
-      Fluttertoast.showToast(
-        msg: "Đổi mật khẩu thất bại! Kiểm tra lại thông tin.",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
+      // Kiểm tra mã trạng thái trả về
+      if (response.statusCode == 200) {
+        // Nếu thành công, giải mã dữ liệu trả về từ server
+        var responseData = jsonDecode(response.body);
+
+        if (responseData['status'] == 'success') {
+          // Hiển thị thông báo thành công
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Mật khẩu đã được thay đổi thành công.')),
+          );
+        } else {
+          // Hiển thị thông báo lỗi từ API (ví dụ: không đúng email hoặc mật khẩu sai)
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Lỗi: ${responseData['message']}')),
+          );
+        }
+      } else {
+        // Thông báo lỗi khi không thể kết nối tới server
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi: Không thể kết nối tới server.')),
+        );
+      }
+    } catch (e) {
+      // Thông báo lỗi nếu có sự cố trong quá trình gửi yêu cầu
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đã xảy ra lỗi: $e')),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Center(child: const Text('Đổi mật khẩu',style: TextStyle(color: Colors.white),)),
-        backgroundColor: Colors.deepOrange, // Màu cam deep
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            // Current Password Field
-            TextFormField(
-              controller: _currentPasswordController,
-              obscureText: _obscureCurrentPassword,
-              decoration: InputDecoration(
-                labelText: 'Mật khẩu hiện tại',
-                labelStyle: TextStyle(color: Colors.deepOrange), // Màu cam deep cho label
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.deepOrange, width: 2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(_obscureCurrentPassword ? Icons.visibility : Icons.visibility_off, color: Colors.deepOrange),
-                  onPressed: () {
-                    setState(() {
-                      _obscureCurrentPassword = !_obscureCurrentPassword;
-                    });
-                  },
-                ),
-              ),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Change Password'),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.help_outline),
+              onPressed: () {
+                Fluttertoast.showToast(msg: "Trợ giúp", gravity: ToastGravity.BOTTOM);
+              },
             ),
-            const SizedBox(height: 16),
-
-            // New Password Field
-            TextFormField(
-              controller: _newPasswordController,
-              obscureText: _obscureNewPassword,
-              decoration: InputDecoration(
-                labelText: 'Mật khẩu mới',
-                labelStyle: TextStyle(color: Colors.deepOrange),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.deepOrange, width: 2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(_obscureNewPassword ? Icons.visibility : Icons.visibility_off, color: Colors.deepOrange),
-                  onPressed: () {
-                    setState(() {
-                      _obscureNewPassword = !_obscureNewPassword;
-                    });
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Confirm New Password Field
-            TextFormField(
-              controller: _confirmPasswordController,
-              obscureText: _obscureConfirmPassword,
-              decoration: InputDecoration(
-                labelText: 'Xác nhận mật khẩu mới',
-                labelStyle: TextStyle(color: Colors.deepOrange),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.deepOrange, width: 2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off, color: Colors.deepOrange),
-                  onPressed: () {
-                    setState(() {
-                      _obscureConfirmPassword = !_obscureConfirmPassword;
-                    });
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Change Password Button
-            ElevatedButton(
-              onPressed: _changePassword,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepOrange, // Màu cam deep
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: const Text(
-                'Đổi mật khẩu',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,color: Colors.white),
-              ),
+            IconButton(
+              icon: Icon(Icons.settings),
+              onPressed: () {
+                Fluttertoast.showToast(msg: "Cài đặt", gravity: ToastGravity.BOTTOM);
+              },
             ),
           ],
+        ),
+        resizeToAvoidBottomInset: true,
+        body: Container(
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/images3.png'),
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+            ),
+          ),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 40),
+              child: Column(
+                children: [
+                  Text(
+                    'Change Password',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepOrange,
+                    ),
+                  ),
+                  SizedBox(height: 15),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 12,
+                          offset: Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(20),
+                    child: Form(
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: emailController,
+                            decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.email, color: Colors.deepOrange),
+                              labelText: 'Vui Lòng Nhập Email',
+                              labelStyle: TextStyle(color: Colors.deepOrange),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          TextFormField(
+                            controller: currentPasswordController,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.lock, color: Colors.deepOrange),
+                              labelText: 'Mật khẩu hiện tại',
+                              labelStyle: TextStyle(color: Colors.deepOrange),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          TextFormField(
+                            controller: newPasswordController,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.lock, color: Colors.deepOrange),
+                              labelText: 'Mật khẩu mới',
+                              labelStyle: TextStyle(color: Colors.deepOrange),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          TextFormField(
+                            controller: confirmPasswordController,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.lock, color: Colors.deepOrange),
+                              labelText: 'Nhập lại mật khẩu mới',
+                              labelStyle: TextStyle(color: Colors.deepOrange),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 40),
+                  ElevatedButton(
+                    onPressed: (){
+                      String email = emailController.text;
+                      String currentPassword = currentPasswordController.text;
+                      String newPassword = newPasswordController.text;
+                      String confirmPassword = confirmPasswordController.text;
+
+                      // Kiểm tra xem mật khẩu mới có khớp với mật khẩu xác nhận không
+                      if (newPassword != confirmPassword) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Mật khẩu mới và mật khẩu xác nhận không khớp!')),
+                        );
+                        return;
+                      }
+
+                      // Gọi hàm đổi mật khẩu và truyền context
+                      changePassword(email, currentPassword, newPassword, confirmPassword, context);
+
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Container(
+                      alignment: Alignment.center,
+                      height: 55.0,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.deepOrange,
+                            Colors.orangeAccent,
+                          ],
+                        ),
+                      ),
+                      child: Text(
+                        'Change Password',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 25),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Already have an account?',
+                        style: TextStyle(color: Colors.grey.shade300),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                              context, MaterialPageRoute(builder: (context) => LoginPage()));
+                        },
+                        child: Text(
+                          'Login Now',
+                          style: TextStyle(color: Colors.deepOrange),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

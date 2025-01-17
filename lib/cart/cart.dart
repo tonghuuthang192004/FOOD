@@ -1,11 +1,14 @@
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-class CartPage extends StatefulWidget {
-  final int userId;
+import '../shared_preferences/shared_preferences.dart';
 
-  CartPage({required this.userId});
+class CartPage extends StatefulWidget {
+
+
+  CartPage({super.key});
 
   @override
   _CartPageState createState() => _CartPageState();
@@ -25,8 +28,10 @@ class _CartPageState extends State<CartPage> {
 
   // Hàm tải giỏ hàng từ API
   Future<void> _loadCartItems() async {
+    Map<String, String> userData = await LocalStorage.getUserData();
+    String userId = userData['id_nguoi_dung'] ?? '';
     try {
-      final response = await http.get(Uri.parse("$apiUrl?action=get_cart_items&id_nguoi_dung=${widget.userId}"));
+      final response = await http.get(Uri.parse("$apiUrl?action=get_cart_items&id_nguoi_dung=${userId}"));
 
       print("Response Status: ${response.statusCode}");
       print("Response Body: ${response.body}");
@@ -54,11 +59,13 @@ class _CartPageState extends State<CartPage> {
   // Hàm cập nhật số lượng sản phẩm trong giỏ
   Future<void> _updateQuantity(int productId, int quantity) async {
     try {
+      Map<String, String> userData = await LocalStorage.getUserData();
+      String userId = userData['id_nguoi_dung'] ?? '';
       final response = await http.post(
         Uri.parse("$apiUrl?action=update_quantity"),
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: {
-          'id_nguoi_dung': widget.userId.toString(),
+          'id_nguoi_dung':userId ,
           'id_san_pham': productId.toString(),
           'so_luong': quantity.toString(),
         },
@@ -78,11 +85,14 @@ class _CartPageState extends State<CartPage> {
   // Hàm xóa sản phẩm khỏi giỏ
   Future<void> _removeFromCart(int productId) async {
     try {
+      Map<String, String> userData = await LocalStorage.getUserData();
+      String userId = userData['id_nguoi_dung'] ?? '';
+
       final response = await http.post(
         Uri.parse("$apiUrl?action=delete_from_cart"),
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: {
-          'id_nguoi_dung': widget.userId.toString(),
+          'id_nguoi_dung':userId ,
           'id_san_pham': productId.toString(),
         },
       );

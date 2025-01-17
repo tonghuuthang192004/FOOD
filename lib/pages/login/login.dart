@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../registerPage/registerPage.dart';
 import '../home/main_food_page.dart';
 
@@ -19,30 +20,81 @@ class _LoginPageState extends State<LoginPage> {
 
   // Hàm đăng nhập
   Future login() async {
-    var url = Uri.parse("http://$kn/API/login.php");
-    var response = await http.post(url, body: {
-      "email": emailController.text,
-      "mat_khau": passwordController.text,
-    });
+    try {
+      var url = Uri.parse("http://$kn/API/login.php");
+      var response = await http.post(url, body: {
+        "email": emailController.text,
+        "mat_khau": passwordController.text,
+      });
 
-    var data = json.decode(response.body);
-    if (data['status'] == "success") {
+      var data = json.decode(response.body);
+
+      if (data['status'] == "success") {
+        // Kiểm tra xem 'id_nguoi_dung' có trong phản hồi từ server không
+        if (data['id_nguoi_dung'] != null) {
+          // Lưu user_id vào SharedPreferences
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('id_nguoi_dung', data['id_nguoi_dung'].toString());  // Lưu user_id
+          await prefs.setString('name', data['ten']);  // Lưu tên người dùng
+          await prefs.setString('email', emailController.text);  // Lưu email người dùng
+
+          // Kiểm tra lại xem dữ liệu đã được lưu thành công chưa
+          String? userId = prefs.getString('id_nguoi_dung');
+          String? userName = prefs.getString('name');
+
+          // In ra thông tin kiểm tra
+          if (userId != null && userId.isNotEmpty) {
+            print("ID người dùng lưu thành công: $userId");
+          } else {
+            print("Lưu ID người dùng thất bại");
+          }
+
+          if (userName != null && userName.isNotEmpty) {
+            print("Tên người dùng lưu thành công: $userName");
+          } else {
+            print("Lưu tên người dùng thất bại");
+          }
+
+          Fluttertoast.showToast(
+            msg: "Đăng nhập thành công!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => MainFoodPage()),
+          );
+        } else {
+          Fluttertoast.showToast(
+            msg: "Đăng nhập thất bại! Không tìm thấy ID người dùng.",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }
+      } else {
+        Fluttertoast.showToast(
+          msg: data['message'] ?? "Đăng nhập thất bại! Kiểm tra lại thông tin.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      }
+    } catch (e) {
+      print("Đã xảy ra lỗi khi kết nối với server: $e");
       Fluttertoast.showToast(
-        msg: "Đăng nhập thành công!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MainFoodPage()),
-      );
-    } else {
-      Fluttertoast.showToast(
-        msg: data['message'] ?? "Đăng nhập thất bại! Kiểm tra lại thông tin.",
+        msg: "Đã xảy ra lỗi khi kết nối với server: $e",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
@@ -52,7 +104,6 @@ class _LoginPageState extends State<LoginPage> {
       );
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
