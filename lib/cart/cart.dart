@@ -1,13 +1,10 @@
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
-import '../shared_preferences/shared_preferences.dart';
+import '../pay/payment.dart';
+import '../shared_preferences/shared_preferences.dart'; // Ensure you have shared_preferences setup
 
 class CartPage extends StatefulWidget {
-
-
   CartPage({super.key});
 
   @override
@@ -26,21 +23,14 @@ class _CartPageState extends State<CartPage> {
     _loadCartItems();
   }
 
-  // Hàm tải giỏ hàng từ API
+  // Load cart items from API
   Future<void> _loadCartItems() async {
     Map<String, String> userData = await LocalStorage.getUserData();
     String userId = userData['id_nguoi_dung'] ?? '';
     try {
       final response = await http.get(Uri.parse("$apiUrl?action=get_cart_items&id_nguoi_dung=${userId}"));
-
-      print("Response Status: ${response.statusCode}");
-      print("Response Body: ${response.body}");
-
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.body);
-
-        print("Cart Items: $data");  // Log cart data
-
         setState(() {
           cartItems = data.map((item) => Map<String, dynamic>.from(item)).toList();
         });
@@ -56,7 +46,7 @@ class _CartPageState extends State<CartPage> {
     }
   }
 
-  // Hàm cập nhật số lượng sản phẩm trong giỏ
+  // Update quantity in cart
   Future<void> _updateQuantity(int productId, int quantity) async {
     try {
       Map<String, String> userData = await LocalStorage.getUserData();
@@ -65,7 +55,7 @@ class _CartPageState extends State<CartPage> {
         Uri.parse("$apiUrl?action=update_quantity"),
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: {
-          'id_nguoi_dung':userId ,
+          'id_nguoi_dung': userId,
           'id_san_pham': productId.toString(),
           'so_luong': quantity.toString(),
         },
@@ -82,17 +72,16 @@ class _CartPageState extends State<CartPage> {
     }
   }
 
-  // Hàm xóa sản phẩm khỏi giỏ
+  // Remove product from cart
   Future<void> _removeFromCart(int productId) async {
     try {
       Map<String, String> userData = await LocalStorage.getUserData();
       String userId = userData['id_nguoi_dung'] ?? '';
-
       final response = await http.post(
         Uri.parse("$apiUrl?action=delete_from_cart"),
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: {
-          'id_nguoi_dung':userId ,
+          'id_nguoi_dung': userId,
           'id_san_pham': productId.toString(),
         },
       );
@@ -110,7 +99,11 @@ class _CartPageState extends State<CartPage> {
 
   @override
   Widget build(BuildContext context) {
-    double totalAmount = cartItems.fold(0, (sum, item) => sum + double.parse(item['gia']) * item['so_luong']);
+    double totalAmount = cartItems.fold(0.0, (sum, item) {
+      double price = double.parse(item['gia'].toString());
+      int quantity = int.parse(item['so_luong'].toString());
+      return sum + price * quantity;
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -148,7 +141,7 @@ class _CartPageState extends State<CartPage> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8.0),
                             child: Image.network(
-                              item['image_url'],  // Corrected key to 'image_url'
+                              item['image_url'],
                               width: 80,
                               height: 80,
                               fit: BoxFit.cover,
@@ -221,7 +214,10 @@ class _CartPageState extends State<CartPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: ElevatedButton(
                 onPressed: () {
-                  // Xử lý thanh toán
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => FastFoodPaymentScreen(cartItems: cartItems,)),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepOrange,

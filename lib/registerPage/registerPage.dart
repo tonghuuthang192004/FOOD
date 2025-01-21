@@ -18,6 +18,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final _matKhauController = TextEditingController();
   final _soDienThoaiController = TextEditingController();
 
+  bool _isPasswordVisible = false; // Boolean to toggle password visibility
+
   String? validateName(String? value) {
     if (value == null || value.isEmpty) {
       return 'Name is required';
@@ -48,8 +50,8 @@ class _RegisterPageState extends State<RegisterPage> {
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email is required';
-    } else if (!value.contains('@gmail.com')) {
-      return 'Email phải chứa @gmail.com còn lại không hợp lệ';
+    } else if (!value.contains('@gmail.com') && !value.contains('@yahoo.com')) {
+      return 'Email must contain @gmail.com or @yahoo.com';
     }
     return null;
   }
@@ -99,7 +101,6 @@ class _RegisterPageState extends State<RegisterPage> {
       resizeToAvoidBottomInset: true,
       body: Container(
         alignment: Alignment.center,
-
         decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/images1.png'), // Đổi thành hình ảnh của bạn
@@ -184,13 +185,24 @@ class _RegisterPageState extends State<RegisterPage> {
                         SizedBox(height: 20),
                         TextFormField(
                           controller: _matKhauController,
-                          obscureText: true,
+                          obscureText: !_isPasswordVisible, // Toggling password visibility
                           validator: validatePassword,
                           decoration: InputDecoration(
                             prefixIcon: Icon(Icons.lock, color: Colors.deepOrange),
                             labelText: 'Password',
                             labelStyle: TextStyle(color: Colors.deepOrange),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                                color: Colors.deepOrange,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordVisible = !_isPasswordVisible;
+                                });
+                              },
+                            ),
                           ),
                         ),
                       ],

@@ -15,7 +15,7 @@ import 'package:http/http.dart' as http;
 
 
 Future<int?> fetchUserId(String email) async {
-  const String apiUrl = 'http://192.168.1.9/API/getuserID.php?action=get_user_id';
+  const String apiUrl = 'http://192.168.30.145/API/getuserID.php?action=get_user_id';
 
   final Uri uri = Uri.parse('$apiUrl&email=$email');
 

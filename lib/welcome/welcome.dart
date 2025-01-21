@@ -42,7 +42,7 @@ class _WelcomePageState extends State<WelcomePage> {
               SizedBox(height: 100),
               _welcomeText(),
               SizedBox(height: 50),
-              _getStartedButton(),
+              // _getStartedButton(),
               SizedBox(height: 20),
               if (_isStarted) _startedText(), // Hiển thị text khi trạng thái đã thay đổi
               SizedBox(height: 50), // Khoảng cách cho các nút
@@ -84,7 +84,7 @@ class _WelcomePageState extends State<WelcomePage> {
   // Welcome Text Widget
   Widget _welcomeText() {
     return Text(
-      'Welcome to the app! THT',
+      'THT',
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 20,
@@ -95,31 +95,31 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 
   // Get Started Button
-  Widget _getStartedButton() {
-    return InkWell(
-      onTap: _onGetStarted, // Gọi hàm _onGetStarted khi nhấn nút
-      child: Container(
-        width: 250,
-        padding: EdgeInsets.symmetric(vertical: 15),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.shade400,
-              offset: Offset(2, 4),
-              blurRadius: 6,
-            ),
-          ],
-        ),
-        child: Text(
-          'Get Started',
-          style: TextStyle(fontSize: 18, color: Color(0xffe46b10)),
-        ),
-      ),
-    );
-  }
+  // Widget _getStartedButton() {
+  //   return InkWell(
+  //     onTap: _onGetStarted, // Gọi hàm _onGetStarted khi nhấn nút
+  //     child: Container(
+  //       width: 250,
+  //       padding: EdgeInsets.symmetric(vertical: 15),
+  //       alignment: Alignment.center,
+  //       decoration: BoxDecoration(
+  //         color: Colors.white,
+  //         borderRadius: BorderRadius.circular(30),
+  //         boxShadow: [
+  //           BoxShadow(
+  //             color: Colors.grey.shade400,
+  //             offset: Offset(2, 4),
+  //             blurRadius: 6,
+  //           ),
+  //         ],
+  //       ),
+  //       child: Text(
+  //         'Get Started',
+  //         style: TextStyle(fontSize: 18, color: Color(0xffe46b10)),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   // Text hiển thị khi nhấn nút "Get Started"
   Widget _startedText() {

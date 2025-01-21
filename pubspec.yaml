@@ -50,6 +50,7 @@ dependencies:
   flutter_screenutil: ^5.9.3
   animated_theme_switcher: ^2.0.10
   provider: ^6.1.2
+  flutter_card_swiper: ^7.0.2
 
 #  google_fonts: ^6.2.1
 

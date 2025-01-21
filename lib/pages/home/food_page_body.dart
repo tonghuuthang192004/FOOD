@@ -203,11 +203,13 @@ class _FoodPageBodyState extends State<FoodPageBody> {
                                 SizedBox(height: Dimensions.height10),
                                 SmallText(text: product.description),
                                 SizedBox(height: Dimensions.height10),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    BigText(text: product.price.toString(), color: Colors.red),
-                                  ],
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      BigText(text: product.price.toString(), color: Colors.red),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
@@ -261,6 +263,7 @@ class _FoodPageBodyState extends State<FoodPageBody> {
           );
         },
         child: Stack(
+
           children: [
             Container(
               height: 220,
@@ -389,9 +392,6 @@ class User {
     );
   }
 }
-
-
-
 class Product {
   final int id;
   final String name;
@@ -402,6 +402,7 @@ class Product {
   final double saucePrice;
   final String categoryName;
   final String? imageUrl;
+  final List<String> imageUrls;
 
   Product({
     required this.id,
@@ -413,20 +414,27 @@ class Product {
     required this.saucePrice,
     required this.categoryName,
     this.imageUrl,
+    required this.imageUrls, // Danh sách các ảnh sản phẩm
   });
 
+  // Factory constructor để tạo đối tượng Product từ JSON
   factory Product.fromJson(Map<String, dynamic> json) {
+    // Chuyển đổi danh sách ảnh từ JSON thành List<String>
+    var imageUrlsFromJson = (json['image_urls'] as List<dynamic>?)
+        ?.map((url) => url.toString())
+        .toList() ?? [];
+
     return Product(
       id: int.tryParse(json['id_san_pham'].toString()) ?? 0,
-      name: json['product_name'],
+      name: json['product_name'] ?? '',
       price: double.tryParse(json['price'].toString()) ?? 0.0,
-      description: json['description'],
-      sauceName: json['sauce_name'],
-      sauceDescription: json['sauce_description'],
+      description: json['description'] ?? '',
+      sauceName: json['sauce_name'] ?? '',
+      sauceDescription: json['sauce_description'] ?? '',
       saucePrice: double.tryParse(json['sauce_price'].toString()) ?? 0.0,
-      categoryName: json['category_name'],
-      imageUrl: json['image_url'],
+      categoryName: json['category_name'] ?? '',
+      imageUrl: json['image_url'],  // ảnh chính (nếu có)
+      imageUrls: imageUrlsFromJson,  // danh sách ảnh sản phẩm
     );
   }
-
 }

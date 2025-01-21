@@ -123,11 +123,11 @@ class _RecommendFoodDetailState extends State<RecommendFoodDetail> {
             // Add to Cart Button
             GestureDetector(
               onTap: () {
-                print("Added to cart");
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ProductBottomSheetPage()), // Chuyển đến ProductBottomSheetPage
-                );
+                // print("Added to cart");
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => ProductBottomSheetPage()), // Chuyển đến ProductBottomSheetPage
+                // );
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(
@@ -169,10 +169,10 @@ class _RecommendFoodDetailState extends State<RecommendFoodDetail> {
             // Checkout Button
             GestureDetector(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ProductBottomSheetPage()), // Chuyển đến ProductBottomSheetPage
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => ProductBottomSheetPage()), // Chuyển đến ProductBottomSheetPage
+                // );
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(

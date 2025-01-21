@@ -226,8 +226,8 @@ class _PopularFoodDetailState extends State<PopularFoodDetail> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      BigText(text: widget.product.name, size: Dimensions.font26),
-                      BigText(text: "\$${widget.product.price}", size: Dimensions.font26),
+                      BigText(text: widget.product.name, size: Dimensions.font16),
+                      BigText(text: "\$${widget.product.price}", size: Dimensions.font16),
                     ],
                   ),
                   SizedBox(height: Dimensions.height20),
@@ -276,12 +276,14 @@ class _PopularFoodDetailState extends State<PopularFoodDetail> {
                   borderRadius: BorderRadius.circular(Dimensions.radius20),
                   color: Colors.white,
                 ),
-                child: Row(
-                  children: [
-                    Icon(Icons.add_shopping_cart, color: AppColors.mainColor),
-                    SizedBox(width: 10),
-                    BigText(text: "ADD TO CART", color: AppColors.mainColor),
-                  ],
+                child: Expanded(
+                  child: Row(
+                    children: [
+                      Icon(Icons.add_shopping_cart, color: AppColors.mainColor),
+                      SizedBox(width: 10),
+                      BigText(text: "ADD TO CART", color: AppColors.mainColor),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -293,19 +295,22 @@ class _PopularFoodDetailState extends State<PopularFoodDetail> {
               },
               child: Container(
                 padding: EdgeInsets.symmetric(
-                  horizontal: Dimensions.width20,
+                  horizontal: Dimensions.width10,
                   vertical: Dimensions.height10,
                 ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(Dimensions.radius20),
                   color: AppColors.mainColor,
                 ),
-                child: Row(
-                  children: [
-                    Icon(Icons.shopping_cart_checkout, color: Colors.white),
-                    SizedBox(width: 10),
-                    BigText(text: "Checkout", color: Colors.white),
-                  ],
+                child:
+                Expanded(
+                  child: Row(
+                    children: [
+                      Icon(Icons.shopping_cart_checkout, color: Colors.white),
+                      SizedBox(width: 10),
+                      BigText(text: "Checkout", color: Colors.white),
+                    ],
+                  ),
                 ),
               ),
             ),

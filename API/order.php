@@ -1,106 +1,81 @@
 <?php
-// Thiết lập kết nối cơ sở dữ liệu
+header('Content-Type: application/json');
+
+// Cấu hình kết nối cơ sở dữ liệu
 include 'connection.php';
 
-// Cấu trúc của hàm trả về dữ liệu dưới dạng JSON
-function sendResponse($status, $message, $data = null) {
-    echo json_encode(array(
-        'status' => $status,
-        'message' => $message,
-        'data' => $data
-    ));
+// Kiểm tra kết nối
+if ($conn->connect_error) {
+    die(json_encode(['status' => 'error', 'message' => 'Connection failed: ' . $conn->connect_error]));
 }
 
-// 1. Xem chi tiết đơn hàng
-if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['order_id'])) {
-    $orderId = $_GET['order_id'];
+// Xử lý các phương thức HTTP (GET và POST)
+$method = $_SERVER['REQUEST_METHOD'];
+
+// API để load và lọc đơn hàng
+if ($method == 'GET') {
+    // Lọc đơn hàng theo trạng thái nếu có tham số 'status'
+    $status = isset($_GET['status']) ? $_GET['status'] : '';  // Lấy trạng thái từ GET request
     
-    $sql = "SELECT * FROM don_hang WHERE id_don_hang = '$orderId'";
-    $result = $conn->query($sql);
-    
-    if ($result->num_rows > 0) {
-        $order = $result->fetch_assoc();
-        
-        // Lấy chi tiết sản phẩm trong đơn hàng
-        $orderDetails = array();
-        $sqlDetails = "SELECT * FROM chi_tiet_don_hang WHERE id_don_hang = '$orderId'";
-        $detailsResult = $conn->query($sqlDetails);
-        
-        while ($detail = $detailsResult->fetch_assoc()) {
-            $product = array(
-                'san_pham_ten' => $detail['id_san_pham'],
-                'so_luong' => $detail['so_luong'],
-                'gia' => $detail['gia']
-            );
-            array_push($orderDetails, $product);
+    // Câu lệnh SQL cơ bản để lọc đơn hàng
+    $sql = "SELECT * FROM don_hang";  // Không lọc theo trạng thái mặc định
+
+    // Thêm điều kiện lọc nếu có trạng thái
+    if ($status && in_array($status, ['Đang chờ', 'Đã giao', 'Đã hủy'])) {
+        if ($status == 'Đang chờ') {
+            $sql .= " WHERE trang_thai = 1";  // Trạng thái 1 - Đang chờ
+        } elseif ($status == 'Đã giao') {
+            $sql .= " WHERE trang_thai = 2";  // Trạng thái 2 - Đã giao
+        } elseif ($status == 'Đã hủy') {
+            $sql .= " WHERE trang_thai = 0";  // Trạng thái 0 - Đã hủy
+        }
+    }
+
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $orders = [];
+
+        // Lấy kết quả và chuyển đổi thành mảng
+        while ($row = $result->fetch_assoc()) {
+            $orders[] = $row;
         }
 
-        sendResponse(200, "Thành công", array('order' => $order, 'details' => $orderDetails));
+        // Trả về kết quả dưới dạng JSON
+        echo json_encode($orders);
+
+        $stmt->close();
     } else {
-        sendResponse(404, "Không tìm thấy đơn hàng.");
+        echo json_encode(['status' => 'error', 'message' => 'Error preparing statement: ' . $conn->error]);
     }
 }
 
-// 2. Lọc đơn hàng theo trạng thái
-if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['status'])) {
-    $status = $_GET['status'];
-    
-    $sql = "SELECT * FROM don_hang WHERE trang_thai = '$status'";
-    $result = $conn->query($sql);
-    
-    if ($result->num_rows > 0) {
-        $orders = array();
-        while ($order = $result->fetch_assoc()) {
-            array_push($orders, $order);
-        }
-        sendResponse(200, "Thành công", array('orders' => $orders));
-    } else {
-        sendResponse(404, "Không tìm thấy đơn hàng theo trạng thái này.");
-    }
-}
+// API để hủy đơn hàng
+if ($method == 'POST' && isset($_POST['action']) && $_POST['action'] == 'cancel') {
+    // Lấy ID đơn hàng từ request
+    $orderId = isset($_POST['order_id']) ? $_POST['order_id'] : null;
 
-// 3. Xem danh sách đơn hàng của người dùng
-if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['user_id'])) {
-    $userId = $_GET['user_id'];
-    
-    $sql = "SELECT * FROM don_hang WHERE id_nguoi_dung = '$userId'";
-    $result = $conn->query($sql);
-    
-    if ($result->num_rows > 0) {
-        $orders = array();
-        while ($order = $result->fetch_assoc()) {
-            array_push($orders, $order);
-        }
-        sendResponse(200, "Thành công", array('orders' => $orders));
-    } else {
-        sendResponse(404, "Không tìm thấy đơn hàng của người dùng này.");
-    }
-}
+    if ($orderId) {
+        // Cập nhật trạng thái đơn hàng thành "Đã hủy"
+        $sql = "UPDATE don_hang SET trang_thai = 0 WHERE id_don_hang = ?";
 
-// 4. Hủy đơn hàng nếu chưa duyệt
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['order_id'])) {
-    $orderId = $_POST['order_id'];
-    
-    // Kiểm tra trạng thái của đơn hàng
-    $sql = "SELECT * FROM don_hang WHERE id_don_hang = '$orderId'";
-    $result = $conn->query($sql);
-    
-    if ($result->num_rows > 0) {
-        $order = $result->fetch_assoc();
-        
-        if ($order['trang_thai'] == 1) { // Chưa duyệt
-            // Cập nhật trạng thái đơn hàng thành "hủy"
-            $sqlUpdate = "UPDATE don_hang SET trang_thai = 0 WHERE id_don_hang = '$orderId'";
-            if ($conn->query($sqlUpdate) === TRUE) {
-                sendResponse(200, "Đơn hàng đã bị hủy.");
+        if ($stmt = $conn->prepare($sql)) {
+            // Liên kết tham số và thực thi câu lệnh
+            $stmt->bind_param('i', $orderId); // 'i' là kiểu dữ liệu integer
+            $stmt->execute();
+
+            if ($stmt->affected_rows > 0) {
+                echo json_encode(['status' => 'success', 'message' => 'Đơn hàng đã được hủy']);
             } else {
-                sendResponse(500, "Có lỗi khi hủy đơn hàng.");
+                echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy đơn hàng để hủy']);
             }
+
+            $stmt->close();
         } else {
-            sendResponse(400, "Đơn hàng đã duyệt, không thể hủy.");
+            echo json_encode(['status' => 'error', 'message' => 'Error preparing statement: ' . $conn->error]);
         }
     } else {
-        sendResponse(404, "Không tìm thấy đơn hàng.");
+        echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy ID đơn hàng']);
     }
 }
 

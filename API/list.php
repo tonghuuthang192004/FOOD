@@ -16,7 +16,7 @@ $sql = "SELECT sp.id_san_pham, sp.ten as product_name, sp.gia, sp.mo_ta, sp.ten_
 
 // Add search query condition if exists
 if ($search_query != '') {
-    $sql .= " AND sp.ten LIKE '%$search_query%'";
+    $sql .= " AND sp.ten LIKE '%$search_query%' AND sp.gia LIKE '%$search_query%' ";
 }
 
 // Add category filter if exists
